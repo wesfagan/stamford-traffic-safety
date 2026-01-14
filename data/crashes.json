@@ -43516,17 +43516,6 @@
     "light": "Dark-Lighted"
   },
   {
-    "lat": 41.03846137,
-    "lng": -73.54774792,
-    "severity": "injury",
-    "type": "vehicle",
-    "date": "2026-01-01",
-    "time": "01:52:00",
-    "location": "SOUTHFIELD AV",
-    "weather": "Fog, Smog, Smoke",
-    "light": "Dark-Lighted"
-  },
-  {
     "lat": 41.141524,
     "lng": -73.545646,
     "severity": "injury",
@@ -43560,17 +43549,6 @@
     "light": "Daylight"
   },
   {
-    "lat": 41.071725,
-    "lng": -73.523958,
-    "severity": "injury",
-    "type": "vehicle",
-    "date": "2026-01-02",
-    "time": "13:30:00",
-    "location": "HOPE ST",
-    "weather": "Cloudy",
-    "light": "Daylight"
-  },
-  {
     "lat": 41.055342,
     "lng": -73.533721,
     "severity": "injury",
@@ -43578,17 +43556,6 @@
     "date": "2025-12-16",
     "time": "19:40:00",
     "location": "GROVE ST",
-    "weather": "Clear",
-    "light": "Dark-Lighted"
-  },
-  {
-    "lat": 41.05594,
-    "lng": -73.523519,
-    "severity": "injury",
-    "type": "vehicle",
-    "date": "2026-01-05",
-    "time": "22:17:00",
-    "location": "1-N",
     "weather": "Clear",
     "light": "Dark-Lighted"
   },
@@ -43601,17 +43568,6 @@
     "time": "11:42:00",
     "location": "15-N",
     "weather": "Rain",
-    "light": "Daylight"
-  },
-  {
-    "lat": 41.104068,
-    "lng": -73.564147,
-    "severity": "injury",
-    "type": "vehicle",
-    "date": "2026-01-03",
-    "time": "11:45:00",
-    "location": "15-S",
-    "weather": "Clear",
     "light": "Daylight"
   },
   {
@@ -43637,39 +43593,6 @@
     "light": "Daylight"
   },
   {
-    "lat": 41.051446,
-    "lng": -73.544757,
-    "severity": "injury",
-    "type": "vehicle",
-    "date": "2026-01-06",
-    "time": "13:55:00",
-    "location": "CLINTON AV",
-    "weather": "Clear",
-    "light": "Daylight"
-  },
-  {
-    "lat": 41.070356,
-    "lng": -73.534367,
-    "severity": "injury",
-    "type": "vehicle",
-    "date": "2026-01-06",
-    "time": "09:02:00",
-    "location": "STRAWBERRY HILL AV",
-    "weather": "Clear",
-    "light": "Daylight"
-  },
-  {
-    "lat": 41.054071,
-    "lng": -73.533263,
-    "severity": "injury",
-    "type": "pedestrian",
-    "date": "2026-01-07",
-    "time": "09:14:00",
-    "location": "GROVE ST",
-    "weather": "Clear",
-    "light": "Daylight"
-  },
-  {
     "lat": 41.04976974,
     "lng": -73.53003248,
     "severity": "injury",
@@ -43681,17 +43604,6 @@
     "light": "Dark-Lighted"
   },
   {
-    "lat": 41.092097,
-    "lng": -73.532628,
-    "severity": "injury",
-    "type": "vehicle",
-    "date": "2026-01-03",
-    "time": "17:04:00",
-    "location": "NEWFIELD AV",
-    "weather": "Clear",
-    "light": "Dark-Lighted"
-  },
-  {
     "lat": 41.047971,
     "lng": -73.53606,
     "severity": "injury",
@@ -43699,28 +43611,6 @@
     "date": "2025-12-30",
     "time": "09:19:00",
     "location": "DOCK ST",
-    "weather": "Clear",
-    "light": "Daylight"
-  },
-  {
-    "lat": 41.046898,
-    "lng": -73.542928,
-    "severity": "injury",
-    "type": "vehicle",
-    "date": "2026-01-07",
-    "time": "14:43:00",
-    "location": "790-E",
-    "weather": "Clear",
-    "light": "Daylight"
-  },
-  {
-    "lat": 41.044132,
-    "lng": -73.543987,
-    "severity": "injury",
-    "type": "vehicle",
-    "date": "2026-01-11",
-    "time": "15:27:00",
-    "location": "PULASKI ST",
     "weather": "Clear",
     "light": "Daylight"
   },

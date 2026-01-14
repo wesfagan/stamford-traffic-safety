@@ -1,15 +1,16 @@
 {
   "version": "2.5.0",
-  "lastUpdated": "2025-01-13",
+  "lastUpdated": "2026-01-14",
   "dataSource": "Connecticut Crash Data Repository (UConn)",
   "dateRange": {
     "start": "2021-01-01",
     "end": "2025-12-31"
   },
   "recordCounts": {
-    "crashes": 3976,
+    "crashes": 3966,
+    "hotspots": 30,
     "fatal": 26,
-    "pedestrianCyclist": 476
+    "pedestrianCyclist": 475
   },
-  "cacheKey": "202501132200"
+  "cacheKey": "1768359342614"
 }
