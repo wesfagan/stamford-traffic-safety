@@ -313,6 +313,12 @@
             color: #999;
         }
 
+        /* Mobile-only buttons (hidden on desktop) */
+        .mobile-hotspots-btn,
+        .mobile-heatmap-btn {
+            display: none;
+        }
+
         /* RIGHT SIDEBAR - HOTSPOTS */
         .map-sidebar {
             position: absolute;
@@ -1116,40 +1122,112 @@
                 position: sticky;
                 top: 0;
                 z-index: 10;
+                padding-top: 20px;
+            }
+
+            /* Drag handle bar */
+            .map-controls .controls-header::before {
+                content: '';
+                position: absolute;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 36px;
+                height: 4px;
+                background: #ccc;
+                border-radius: 2px;
             }
 
             .map-controls .controls-header::after {
-                content: '⌃ Filters';
+                content: 'Tap to expand';
                 display: block;
                 text-align: center;
-                font-size: 11px;
-                color: #888;
-                margin-top: 4px;
+                font-size: 10px;
+                color: #999;
+                margin-top: 6px;
+                letter-spacing: 0.3px;
             }
 
             .map-controls.expanded .controls-header::after {
-                content: '⌄ Close';
+                content: 'Tap to close';
             }
 
-            /* Hotspots as compact collapsed panel */
+            /* Hotspots hidden by default on mobile, shown via button */
             .map-sidebar {
+                display: none;
                 position: fixed;
                 top: auto;
                 bottom: 70px;
                 right: 10px;
-                left: auto;
+                left: 10px;
                 width: auto;
-                max-width: 200px;
-                max-height: 50vh;
-                border-radius: 10px;
+                max-width: none;
+                max-height: 45vh;
+                border-radius: 12px;
+                z-index: 1000;
+            }
+
+            .map-sidebar.mobile-visible {
+                display: block;
             }
 
             .map-sidebar.collapsed {
-                max-width: 160px;
+                max-width: none;
             }
 
             .map-sidebar .sidebar-header h3 {
-                font-size: 12px;
+                font-size: 13px;
+            }
+
+            /* Mobile hotspots toggle button */
+            .mobile-hotspots-btn {
+                display: flex;
+                position: fixed;
+                bottom: 70px;
+                right: 10px;
+                background: #fefefe;
+                border: 1px solid #e0ddd5;
+                border-radius: 8px;
+                padding: 8px 12px;
+                font-size: 11px;
+                font-weight: 500;
+                color: #555;
+                cursor: pointer;
+                z-index: 999;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                align-items: center;
+                gap: 5px;
+            }
+
+            .mobile-hotspots-btn.active {
+                background: #e8e6e0;
+                border-color: #999;
+            }
+
+            /* Mobile heatmap toggle button */
+            .mobile-heatmap-btn {
+                display: flex;
+                position: fixed;
+                bottom: 70px;
+                left: 10px;
+                background: #fefefe;
+                border: 1px solid #e0ddd5;
+                border-radius: 8px;
+                padding: 8px 12px;
+                font-size: 11px;
+                font-weight: 500;
+                color: #555;
+                cursor: pointer;
+                z-index: 999;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                align-items: center;
+                gap: 5px;
+            }
+
+            .mobile-heatmap-btn.active {
+                background: #fce4e4;
+                border-color: #d9534f;
+                color: #c62828;
             }
 
             /* Heatmap legend repositioned */
@@ -1357,6 +1435,14 @@
                 <span>High</span>
             </div>
         </div>
+
+        <!-- Mobile-only map controls -->
+        <button class="mobile-heatmap-btn" id="mobileHeatmapBtn" onclick="toggleMobileHeatmap()">
+            <span>◉</span> Density
+        </button>
+        <button class="mobile-hotspots-btn" id="mobileHotspotsBtn" onclick="toggleMobileHotspots()">
+            <span>⚠</span> Hotspots
+        </button>
 
         <div id="map"></div>
     </div>
@@ -1804,6 +1890,9 @@
             const heatmapCheckbox = document.getElementById('showHeatmap');
             if (heatmapCheckbox) {
                 heatmapCheckbox.addEventListener('change', (e) => {
+                    const mobileBtn = document.getElementById('mobileHeatmapBtn');
+                    if (mobileBtn) mobileBtn.classList.toggle('active', e.target.checked);
+
                     if (e.target.checked) {
                         showHeatmap();
                     } else {
@@ -2077,6 +2166,32 @@
 
             // Show crash markers again
             crashMarkers.forEach(marker => marker.setStyle({ opacity: 1, fillOpacity: 0.8 }));
+        }
+
+        // Mobile-only controls
+        function toggleMobileHeatmap() {
+            const checkbox = document.getElementById('showHeatmap');
+            const btn = document.getElementById('mobileHeatmapBtn');
+            checkbox.checked = !checkbox.checked;
+            btn.classList.toggle('active', checkbox.checked);
+
+            if (checkbox.checked) {
+                showHeatmap();
+            } else {
+                hideHeatmap();
+            }
+        }
+
+        function toggleMobileHotspots() {
+            const sidebar = document.getElementById('mapSidebar');
+            const btn = document.getElementById('mobileHotspotsBtn');
+            const isVisible = sidebar.classList.toggle('mobile-visible');
+            btn.classList.toggle('active', isVisible);
+
+            // Expand the list when shown on mobile
+            if (isVisible && sidebar.classList.contains('collapsed')) {
+                toggleHotspotsList();
+            }
         }
 
         function applyFilters() {
