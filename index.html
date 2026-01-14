@@ -20,10 +20,12 @@
         }
 
         .header {
-            background: #2d2d2d;
+            background: linear-gradient(rgba(30, 30, 30, 0.85), rgba(30, 30, 30, 0.9)),
+                        url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1200&q=80') center/cover no-repeat;
             color: white;
-            padding: 20px 24px;
+            padding: 32px 24px 24px;
             border-bottom: 1px solid #3d3d3d;
+            position: relative;
         }
 
         .header-content {
@@ -34,6 +36,8 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
+            position: relative;
+            z-index: 1;
         }
 
         .header-text {
@@ -42,23 +46,31 @@
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             letter-spacing: -0.3px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
         .header p {
             font-size: 14px;
-            opacity: 0.8;
+            opacity: 0.9;
             font-weight: 400;
             line-height: 1.4;
         }
 
         .data-version {
             font-size: 11px;
+            opacity: 0.6;
+            margin-top: 6px;
+        }
+
+        .disclaimer {
+            font-size: 10px;
             opacity: 0.5;
-            margin-top: 4px;
+            margin-top: 8px;
+            font-style: italic;
         }
 
         .nav {
@@ -1043,7 +1055,8 @@
 
         @media (max-width: 768px) {
             .header {
-                padding: 12px 16px;
+                padding: 16px 16px 12px;
+                background-size: cover;
             }
 
             .header h1 {
@@ -1053,6 +1066,11 @@
             .header p {
                 font-size: 12px;
                 display: none;
+            }
+
+            .disclaimer {
+                font-size: 9px;
+                margin-top: 4px;
             }
 
             .nav-item {
@@ -1186,6 +1204,7 @@
                 <h1>Stamford Traffic Safety Explorer</h1>
                 <p>Crash data across Stamford, mapped.</p>
                 <div class="data-version" id="dataVersion">Loading...</div>
+                <div class="disclaimer">Unofficial. Not affiliated with the City of Stamford.</div>
             </div>
         </div>
     </div>
@@ -1895,7 +1914,7 @@
             crashMarkers.forEach(marker => marker.setStyle({ opacity: 0, fillOpacity: 0 }));
 
             // Create grid-based density calculation with finer grid for smoothness
-            const gridSize = 0.0025; // ~250m cells for smoother appearance
+            const gridSize = 0.002; // ~200m cells for smoother blending
             heatmapGridData = {};
 
             filteredCrashes.forEach(crash => {
@@ -1917,56 +1936,72 @@
                 else heatmapGridData[key].injury++;
             });
 
-            // Find max count for normalization
-            const maxCount = Math.max(...Object.values(heatmapGridData).map(g => g.count), 1);
+            // Percentile-based normalization (95th percentile as max) so hotspots pop
+            const counts = Object.values(heatmapGridData).map(g => g.count).sort((a, b) => a - b);
+            const p95Index = Math.floor(counts.length * 0.95);
+            const normMax = counts[p95Index] || counts[counts.length - 1] || 1;
 
-            // Color scale (smooth red gradient)
+            // Smooth color interpolation
             const getHeatColor = (intensity) => {
-                // Interpolate through warm colors
-                if (intensity < 0.2) return '#fee5d9';
-                if (intensity < 0.35) return '#fcbba1';
-                if (intensity < 0.5) return '#fc9272';
-                if (intensity < 0.65) return '#fb6a4a';
-                if (intensity < 0.8) return '#ef3b2c';
-                if (intensity < 0.9) return '#cb181d';
-                return '#99000d';
+                // Clamp intensity to 0-1 range
+                const t = Math.min(Math.max(intensity, 0), 1);
+                // Smooth gradient through warm colors
+                if (t < 0.15) return '#fff5f0';
+                if (t < 0.3) return '#fee0d2';
+                if (t < 0.45) return '#fcbba1';
+                if (t < 0.6) return '#fc9272';
+                if (t < 0.75) return '#fb6a4a';
+                if (t < 0.9) return '#de2d26';
+                return '#a50f15';
             };
 
-            // Render overlapping density zones for smoother appearance
+            // Render overlapping density zones for kernel-like smoothing
             Object.entries(heatmapGridData).forEach(([key, cell]) => {
                 const centerLat = cell.lat / cell.count;
                 const centerLng = cell.lng / cell.count;
-                const intensity = cell.count / maxCount;
+                // Normalize with 95th percentile, allow values above 1 for true hotspots
+                const rawIntensity = cell.count / normMax;
+                const intensity = Math.min(rawIntensity, 1.2); // Cap at 1.2 for color calc
 
-                // Create multiple overlapping circles for kernel-like smoothing
-                const baseRadius = 150 + (intensity * 200);
+                // Larger, softer radii for smoother blending
+                const baseRadius = 180 + (Math.min(intensity, 1) * 180);
 
-                // Outer glow
-                const outerCircle = L.circle([centerLat, centerLng], {
-                    radius: baseRadius * 1.5,
-                    fillColor: getHeatColor(intensity * 0.5),
-                    fillOpacity: 0.15,
+                // Outer diffuse glow (very soft)
+                const outerGlow = L.circle([centerLat, centerLng], {
+                    radius: baseRadius * 2,
+                    fillColor: getHeatColor(intensity * 0.3),
+                    fillOpacity: 0.08,
                     stroke: false,
                     interactive: false
                 });
-                heatmapLayer.addLayer(outerCircle);
+                heatmapLayer.addLayer(outerGlow);
+
+                // Middle glow
+                const midGlow = L.circle([centerLat, centerLng], {
+                    radius: baseRadius * 1.4,
+                    fillColor: getHeatColor(intensity * 0.6),
+                    fillOpacity: 0.12,
+                    stroke: false,
+                    interactive: false
+                });
+                heatmapLayer.addLayer(midGlow);
 
                 // Main zone
                 const mainCircle = L.circle([centerLat, centerLng], {
                     radius: baseRadius,
                     fillColor: getHeatColor(intensity),
-                    fillOpacity: 0.35 + (intensity * 0.25),
+                    fillOpacity: 0.25 + (Math.min(intensity, 1) * 0.2),
                     stroke: false,
                     interactive: false
                 });
                 heatmapLayer.addLayer(mainCircle);
 
-                // Inner core for high-density areas
-                if (intensity > 0.3) {
+                // Inner core for high-density areas (hotspots really pop)
+                if (intensity > 0.5) {
                     const coreCircle = L.circle([centerLat, centerLng], {
                         radius: baseRadius * 0.5,
-                        fillColor: getHeatColor(Math.min(intensity * 1.3, 1)),
-                        fillOpacity: 0.4,
+                        fillColor: getHeatColor(Math.min(intensity * 1.2, 1)),
+                        fillOpacity: 0.35,
                         stroke: false,
                         interactive: false
                     });
@@ -1975,7 +2010,7 @@
 
                 // Invisible interactive zone for hover
                 const hoverZone = L.circle([centerLat, centerLng], {
-                    radius: baseRadius,
+                    radius: baseRadius * 1.2,
                     fillColor: 'transparent',
                     fillOpacity: 0,
                     stroke: false,
