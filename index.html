@@ -1027,45 +1027,134 @@
         }
 
         /* RESPONSIVE */
+        /* Heatmap tooltip */
+        .heatmap-tooltip {
+            background: rgba(255,255,255,0.95);
+            border: 1px solid #d5d2ca;
+            border-radius: 6px;
+            padding: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .heatmap-tooltip .leaflet-tooltip-content {
+            margin: 0;
+        }
+
         @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+
             .header h1 {
-                font-size: 22px;
+                font-size: 18px;
             }
 
-            .map-controls,
-            .map-sidebar {
-                position: relative;
-                width: 100%;
-                margin: 10px;
-                top: auto;
-                left: auto;
-                right: auto;
-                max-width: none;
+            .header p {
+                font-size: 12px;
+                display: none;
             }
 
+            .nav-item {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+
+            /* Map takes full viewport on mobile */
             #explore-section {
-                height: auto;
-                min-height: 500px;
-                display: flex;
-                flex-direction: column;
+                height: calc(100vh - 100px);
+                min-height: 400px;
+                position: relative;
             }
 
             #map {
-                height: 500px;
-                order: 3;
+                height: 100%;
+                width: 100%;
+            }
+
+            /* Filters as compact bottom sheet */
+            .map-controls {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: auto;
+                max-width: none;
+                width: 100%;
+                border-radius: 16px 16px 0 0;
+                max-height: 60vh;
+                overflow-y: auto;
+                z-index: 1001;
+                transform: translateY(calc(100% - 60px));
+                transition: transform 0.3s ease;
+            }
+
+            .map-controls.expanded {
+                transform: translateY(0);
+            }
+
+            .map-controls .controls-header {
+                cursor: pointer;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+
+            .map-controls .controls-header::after {
+                content: '⌃ Filters';
+                display: block;
+                text-align: center;
+                font-size: 11px;
+                color: #888;
+                margin-top: 4px;
+            }
+
+            .map-controls.expanded .controls-header::after {
+                content: '⌄ Close';
+            }
+
+            /* Hotspots as compact collapsed panel */
+            .map-sidebar {
+                position: fixed;
+                top: auto;
+                bottom: 70px;
+                right: 10px;
+                left: auto;
+                width: auto;
+                max-width: 200px;
+                max-height: 50vh;
+                border-radius: 10px;
+            }
+
+            .map-sidebar.collapsed {
+                max-width: 160px;
+            }
+
+            .map-sidebar .sidebar-header h3 {
+                font-size: 12px;
+            }
+
+            /* Heatmap legend repositioned */
+            .heatmap-legend {
+                bottom: 80px;
+                right: 10px;
+                left: auto;
+            }
+
+            .heatmap-legend.show {
+                display: block;
             }
 
             .content-section {
-                padding: 40px 20px;
+                padding: 32px 16px;
             }
 
             .content-section h2 {
-                font-size: 24px;
+                font-size: 22px;
             }
 
             .content-section h3 {
-                font-size: 19px;
-                margin: 32px 0 14px;
+                font-size: 17px;
+                margin: 28px 0 12px;
             }
 
             .filter-grid {
@@ -1094,7 +1183,7 @@
         <div class="header-content">
             <div class="header-text">
                 <h1>Stamford Traffic Safety Explorer</h1>
-                <p>Five years of injury and fatal crashes. Focus on pedestrian and cyclist safety.</p>
+                <p>Crash data across Stamford, mapped.</p>
                 <div class="data-version" id="dataVersion">Loading...</div>
             </div>
         </div>
@@ -1254,14 +1343,14 @@
 
     <div class="section" id="analysis-section">
         <div class="content-section">
-            <h2>What Five Years of Crashes Reveal</h2>
-            <p class="subtitle">Injury and fatal traffic crashes in Stamford, analyzed to understand where infrastructure improvements could save lives.</p>
+            <h2>Crash Patterns</h2>
+            <p class="subtitle">A look at where and when injury and fatal crashes happen in Stamford.</p>
 
             <div class="divider"></div>
 
-            <h3>The Pedestrian and Cyclist Problem</h3>
-            <p>Over the last five years, 310 crashes involved people walking or cycling. These crashes represent 13% of all injury and fatal crashes, but 39% of fatalities. Put another way: if you're not in a car, you're far more likely to die when something goes wrong.</p>
-            <p>Nine people walking or cycling were killed. Twenty-three people total died in crashes during this period. The math is clear and brutal.</p>
+            <h3>Pedestrian and Cyclist Crashes</h3>
+            <p>Over the last five years, 310 crashes involved people walking or cycling. These represent 13% of all injury and fatal crashes, but account for 39% of fatalities.</p>
+            <p>Nine pedestrians or cyclists were killed during this period. Total fatalities across all crash types: 23.</p>
 
             <div class="highlight-box">
                 <p><strong>Bedford Street:</strong> 7 pedestrian or cyclist crashes, 1 fatal</p>
@@ -1270,33 +1359,33 @@
                 <p><strong>Jefferson Street:</strong> 4 pedestrian or cyclist crashes</p>
             </div>
 
-            <p>These numbers represent people trying to cross the street, ride to work, or walk to the store. They reveal design choices that prioritize vehicle speed over human safety.</p>
+            <p>These locations see repeated pedestrian and cyclist crashes, suggesting they may warrant closer attention from transportation planners.</p>
 
-            <h3>Where Crashes Cluster</h3>
-            <p>Crashes are not random. They concentrate in predictable places where street design creates conflict, confusion, or excessive speed.</p>
+            <h3>High-Crash Locations</h3>
+            <p>Crashes tend to cluster at certain locations. Here are some of the areas with the highest crash counts:</p>
 
             <div class="location-highlight">
                 <h4>North State Street (Route 1)</h4>
                 <p class="location-meta">34 injury crashes</p>
-                <p>The single most dangerous corridor in Stamford. High speeds, unclear crossings, and heavy traffic volumes combine to produce consistent injury outcomes. Comprehensive redesign needed.</p>
+                <p>High traffic corridor with consistent crash activity. Multiple lanes, commercial driveways, and pedestrian crossings.</p>
             </div>
 
             <div class="location-highlight">
                 <h4>I-95 South (Exit 8 area)</h4>
                 <p class="location-meta">22 injury crashes, 1 fatal</p>
-                <p>Highway crashes are expected. What's concerning is pedestrian involvement at a highway exit, suggesting access control and barrier design failures.</p>
+                <p>Highway exit area with high vehicle speeds merging onto local roads.</p>
             </div>
 
             <div class="location-highlight">
                 <h4>Route 137 North</h4>
                 <p class="location-meta">17 injury crashes, 3 pedestrian/cyclist</p>
-                <p>Missing sidewalks and inadequate pedestrian signals force people into dangerous situations. Predictable results.</p>
+                <p>Suburban corridor with limited pedestrian infrastructure in some sections.</p>
             </div>
 
             <div class="location-highlight">
                 <h4>Broad Street (Downtown)</h4>
                 <p class="location-meta">16 injury crashes, 7 pedestrian/cyclist</p>
-                <p>Downtown should be the safest place to walk. Instead, nearly half the crashes here involve people outside vehicles. Street redesign with pedestrian priority is overdue.</p>
+                <p>Downtown area with high pedestrian and vehicle activity. Nearly half of crashes here involve pedestrians or cyclists.</p>
             </div>
 
             <h3>When Crashes Happen</h3>
@@ -1309,41 +1398,41 @@
             </ul>
             <p>These patterns suggest where targeted enforcement, signal timing adjustments, and lighting improvements could reduce harm.</p>
 
-            <h3>What This Implies About Street Design</h3>
-            <p>These crashes are not accidents. They are predictable outcomes of design decisions. Wide lanes encourage speed. Missing crosswalks force risky behavior. Poor lighting makes pedestrians invisible.</p>
-            <p>The data shows us where the problems are. What remains is deciding whether to act.</p>
+            <h3>Using This Data</h3>
+            <p>Crash data can help identify areas that may benefit from infrastructure review. Factors like road design, signal timing, lighting, and crosswalk placement all play a role in crash patterns.</p>
+            <p>The city's Vision Zero program uses data like this to prioritize safety improvements across Stamford.</p>
 
             <div class="divider"></div>
 
-            <h3>A Note on Severity</h3>
+            <h3>Crash Severity Classifications</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>Type</th>
+                        <th>Classification</th>
                         <th>Count</th>
-                        <th>What This Means</th>
+                        <th>Description</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><strong>Fatal</strong></td>
                         <td>23</td>
-                        <td>Lives that could have been saved</td>
+                        <td>Crashes resulting in at least one death</td>
                     </tr>
                     <tr>
                         <td><strong>Injury</strong></td>
                         <td>2,346</td>
-                        <td>Hospital visits, trauma, economic impact</td>
+                        <td>Crashes with reported injuries requiring medical attention</td>
                     </tr>
                     <tr style="opacity: 0.5;">
-                        <td>Property damage</td>
+                        <td>Property damage only</td>
                         <td>8,550</td>
-                        <td>Not included in this analysis</td>
+                        <td>Minor crashes (fender benders) with no reported injuries</td>
                     </tr>
                 </tbody>
             </table>
 
-            <p class="footnote">This analysis excludes property-damage-only crashes to focus on where people are actually getting hurt. Fender-benders in parking lots don't tell us where street design is failing. Injuries and deaths do.</p>
+            <p class="footnote">This tool focuses on injury and fatal crashes. Property-damage-only crashes are excluded since they typically represent minor incidents like parking lot fender benders.</p>
         </div>
     </div>
 
@@ -1401,33 +1490,41 @@
 
     <div class="section" id="about-section">
         <div class="content-section">
-            <h2>About This Project</h2>
-            <p class="subtitle">Why this exists and how to use it.</p>
+            <h2>About This Tool</h2>
+            <p class="subtitle">A map of Stamford crash data to help residents stay informed.</p>
 
             <div class="divider"></div>
 
-            <h3>Purpose</h3>
-            <p>This tool makes Stamford's crash data accessible to anyone who cares about street safety. It's designed for residents, advocates, planners, and journalists who want to understand where people are getting hurt and what patterns emerge.</p>
-            <p>By focusing on injury and fatal crashes, and particularly on pedestrian and cyclist safety, it highlights the infrastructure decisions that have the biggest impact on whether people live or die on local streets.</p>
+            <h3>What This Is</h3>
+            <p>This is a map of reported injury and fatal crashes in Stamford over the past five years. The data comes from police reports filed with the state. It's meant to give residents a clear picture of where crashes tend to happen across the city.</p>
+            <p>You can filter by year, time of day, weather, and other factors to see how patterns shift. The density overlay shows which areas have higher crash concentrations.</p>
 
-            <h3>What You Can Do With This</h3>
-            <p><strong>Check your neighborhood:</strong> See if dangerous intersections are near your home, your kid's school, or your commute route.</p>
-            <p><strong>Advocate for change:</strong> Bring specific crash data to city meetings, community boards, or local representatives. Data changes conversations.</p>
-            <p><strong>Understand patterns:</strong> See how crashes cluster by time, location, and type. Understand what's predictable and what's preventable.</p>
-            <p><strong>Hold leaders accountable:</strong> Stamford committed to Vision Zero in 2022 with a goal of zero traffic deaths by 2032. This tool shows whether we're on track.</p>
+            <h3>Staying Safe</h3>
+            <p>A few practical reminders when you're out and about:</p>
+            <ul>
+                <li>Walk like cars may not yield, even in crosswalks</li>
+                <li>Look both ways, even on a walk signal</li>
+                <li>Be extra cautious at night and in rain</li>
+                <li>Report recurring hazards (broken signals, poor lighting) to 311</li>
+            </ul>
 
-            <h3>Vision Zero Context</h3>
-            <p>Vision Zero is a commitment to eliminate all traffic fatalities and serious injuries. It starts from the premise that no loss of life is acceptable, and that street design should prioritize human safety over vehicle speed.</p>
-            <p>Stamford adopted Vision Zero in 2022. The current pace suggests we are not on track to meet the 2032 goal. Acceleration requires both political will and sustained investment in proven safety interventions.</p>
+            <h3>Stamford's Vision Zero Program</h3>
+            <p>Stamford adopted Vision Zero in 2022, joining cities nationwide working to reduce traffic deaths. The city has been making improvements to streets, signals, and crosswalks as part of this effort. This tool is meant to complement that work by making crash data more accessible to residents.</p>
 
-            <h3>Sharing This Tool</h3>
-            <p>Share this tool by linking to the official site. The data is updated periodically as new crash reports become available.</p>
-            <p><strong>Official link:</strong> <a href="https://wesfagan.github.io/stamford-traffic-safety/" style="color: #2e7d32;">wesfagan.github.io/stamford-traffic-safety</a></p>
-            <p>If it helps improve safety in Stamford, share it widely.</p>
+            <div class="highlight-box">
+                <p><strong>Official City Resources:</strong></p>
+                <p><a href="https://www.stamfordct.gov/government/operations/traffic-parking" style="color: #2e7d32;">Traffic & Parking Department</a></p>
+                <p><a href="https://www.stamfordct.gov/home/showpublisheddocument/8196" style="color: #2e7d32;">Vision Zero Action Plan (PDF)</a></p>
+                <p><a href="https://www.stamfordct.gov/government/operations/traffic-parking/vision-zero" style="color: #2e7d32;">Vision Zero Program Page</a></p>
+            </div>
+
+            <h3>Share This Tool</h3>
+            <p>If you find this useful, feel free to share it.</p>
+            <p><strong>Link:</strong> <a href="https://wesfagan.github.io/stamford-traffic-safety/" style="color: #2e7d32;">wesfagan.github.io/stamford-traffic-safety</a></p>
 
             <div class="divider"></div>
 
-            <p class="footnote">This is an independent project created to support local traffic safety efforts. It is not affiliated with the City of Stamford or any official agency. All data is from public sources.</p>
+            <p class="footnote">This is an independent project using publicly available data from the Connecticut Crash Data Repository. It is not affiliated with the City of Stamford.</p>
         </div>
     </div>
 
@@ -1502,12 +1599,12 @@
 
                 const versionEl = document.getElementById('dataVersion');
                 if (versionEl) {
-                    versionEl.textContent = `Data version ${metaData.version} | Last updated: ${metaData.lastUpdated}`;
+                    versionEl.textContent = 'Data: 2026';
                 }
 
                 const qaVersionEl = document.getElementById('qaVersion');
                 if (qaVersionEl) {
-                    qaVersionEl.textContent = `${metaData.version} (${metaData.lastUpdated})`;
+                    qaVersionEl.textContent = metaData.version || '2.5';
                 }
 
                 return true;
@@ -1592,6 +1689,17 @@
         }
 
         function setupControls() {
+            // Mobile filter panel toggle
+            const controlsHeader = document.querySelector('.map-controls .controls-header');
+            const mapControls = document.querySelector('.map-controls');
+            if (controlsHeader && mapControls) {
+                controlsHeader.addEventListener('click', (e) => {
+                    if (window.innerWidth <= 768) {
+                        mapControls.classList.toggle('expanded');
+                    }
+                });
+            }
+
             const heatmapCheckbox = document.getElementById('showHeatmap');
             if (heatmapCheckbox) {
                 heatmapCheckbox.addEventListener('change', (e) => {
@@ -1769,58 +1877,113 @@
             return '#666';
         }
 
+        let heatmapGridData = {}; // Store grid data for hover tooltips
+
         function showHeatmap() {
             if (heatmapLayer) map.removeLayer(heatmapLayer);
             heatmapLayer = L.layerGroup();
             const filteredCrashes = getFilteredCrashes();
 
-            // Create grid-based density calculation
-            const gridSize = 0.003; // ~300m cells
-            const grid = {};
+            // Hide crash markers when heatmap is on
+            crashMarkers.forEach(marker => marker.setStyle({ opacity: 0, fillOpacity: 0 }));
+
+            // Create grid-based density calculation with finer grid for smoothness
+            const gridSize = 0.0025; // ~250m cells for smoother appearance
+            heatmapGridData = {};
 
             filteredCrashes.forEach(crash => {
                 const gridX = Math.floor(crash.lng / gridSize);
                 const gridY = Math.floor(crash.lat / gridSize);
                 const key = `${gridX},${gridY}`;
 
-                if (!grid[key]) {
-                    grid[key] = { count: 0, weight: 0, lat: 0, lng: 0 };
+                if (!heatmapGridData[key]) {
+                    heatmapGridData[key] = {
+                        count: 0, fatal: 0, injury: 0,
+                        lat: 0, lng: 0, gridX, gridY
+                    };
                 }
 
-                // Weight by severity
-                const weight = crash.severity === 'fatal' ? 5 :
-                              (crash.type === 'pedestrian' || crash.type === 'cyclist') ? 3 : 1;
-
-                grid[key].count++;
-                grid[key].weight += weight;
-                grid[key].lat += crash.lat;
-                grid[key].lng += crash.lng;
+                heatmapGridData[key].count++;
+                heatmapGridData[key].lat += crash.lat;
+                heatmapGridData[key].lng += crash.lng;
+                if (crash.severity === 'fatal') heatmapGridData[key].fatal++;
+                else heatmapGridData[key].injury++;
             });
 
-            // Find max weight for normalization
-            const maxWeight = Math.max(...Object.values(grid).map(g => g.weight), 1);
+            // Find max count for normalization
+            const maxCount = Math.max(...Object.values(heatmapGridData).map(g => g.count), 1);
 
-            // Color scale (red gradient)
+            // Color scale (smooth red gradient)
             const getHeatColor = (intensity) => {
-                const colors = ['#fee5d9', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#99000d'];
-                const idx = Math.min(Math.floor(intensity * (colors.length - 1)), colors.length - 1);
-                return colors[idx];
+                // Interpolate through warm colors
+                if (intensity < 0.2) return '#fee5d9';
+                if (intensity < 0.35) return '#fcbba1';
+                if (intensity < 0.5) return '#fc9272';
+                if (intensity < 0.65) return '#fb6a4a';
+                if (intensity < 0.8) return '#ef3b2c';
+                if (intensity < 0.9) return '#cb181d';
+                return '#99000d';
             };
 
-            // Render density circles
-            Object.values(grid).forEach(cell => {
+            // Render overlapping density zones for smoother appearance
+            Object.entries(heatmapGridData).forEach(([key, cell]) => {
                 const centerLat = cell.lat / cell.count;
                 const centerLng = cell.lng / cell.count;
-                const intensity = cell.weight / maxWeight;
-                const radius = 80 + (intensity * 120); // 80-200m radius
+                const intensity = cell.count / maxCount;
 
-                const circle = L.circle([centerLat, centerLng], {
-                    radius: radius,
-                    fillColor: getHeatColor(intensity),
-                    fillOpacity: 0.5 + (intensity * 0.3),
-                    stroke: false
+                // Create multiple overlapping circles for kernel-like smoothing
+                const baseRadius = 150 + (intensity * 200);
+
+                // Outer glow
+                const outerCircle = L.circle([centerLat, centerLng], {
+                    radius: baseRadius * 1.5,
+                    fillColor: getHeatColor(intensity * 0.5),
+                    fillOpacity: 0.15,
+                    stroke: false,
+                    interactive: false
                 });
-                heatmapLayer.addLayer(circle);
+                heatmapLayer.addLayer(outerCircle);
+
+                // Main zone
+                const mainCircle = L.circle([centerLat, centerLng], {
+                    radius: baseRadius,
+                    fillColor: getHeatColor(intensity),
+                    fillOpacity: 0.35 + (intensity * 0.25),
+                    stroke: false,
+                    interactive: false
+                });
+                heatmapLayer.addLayer(mainCircle);
+
+                // Inner core for high-density areas
+                if (intensity > 0.3) {
+                    const coreCircle = L.circle([centerLat, centerLng], {
+                        radius: baseRadius * 0.5,
+                        fillColor: getHeatColor(Math.min(intensity * 1.3, 1)),
+                        fillOpacity: 0.4,
+                        stroke: false,
+                        interactive: false
+                    });
+                    heatmapLayer.addLayer(coreCircle);
+                }
+
+                // Invisible interactive zone for hover
+                const hoverZone = L.circle([centerLat, centerLng], {
+                    radius: baseRadius,
+                    fillColor: 'transparent',
+                    fillOpacity: 0,
+                    stroke: false,
+                    interactive: true
+                });
+
+                hoverZone.bindTooltip(`
+                    <div style="font-size: 12px; line-height: 1.4;">
+                        <strong>${cell.count} crashes</strong><br>
+                        ${cell.fatal > 0 ? `<span style="color: #c62828;">${cell.fatal} fatal</span><br>` : ''}
+                        ${cell.injury} injury
+                    </div>
+                `, { sticky: true, className: 'heatmap-tooltip' });
+
+                heatmapLayer.addLayer(hoverZone);
             });
 
             heatmapLayer.addTo(map);
@@ -1832,6 +1995,9 @@
         function hideHeatmap() {
             if (heatmapLayer) map.removeLayer(heatmapLayer);
             document.getElementById('heatmapLegend').classList.remove('show');
+
+            // Show crash markers again
+            crashMarkers.forEach(marker => marker.setStyle({ opacity: 1, fillOpacity: 0.8 }));
         }
 
         function applyFilters() {
