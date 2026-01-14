@@ -891,8 +891,9 @@
             margin-top: 14px;
         }
 
-        /* QA PANEL */
+        /* QA PANEL - hidden by default, show with ?debug=1 */
         .qa-panel {
+            display: none;
             position: fixed;
             bottom: 20px;
             left: 20px;
@@ -1553,6 +1554,12 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Debug mode detection
+        const isDebugMode = new URLSearchParams(window.location.search).has('debug');
+        if (isDebugMode) {
+            document.getElementById('qaPanel').style.display = 'block';
+        }
+
         // Global data containers
         let crashData = [];
         let hotspotData = [];
@@ -2540,9 +2547,11 @@
 
                 hideLoading();
 
-                setTimeout(() => {
-                    runSmokeTests();
-                }, 500);
+                if (isDebugMode) {
+                    setTimeout(() => {
+                        runSmokeTests();
+                    }, 500);
+                }
 
             } catch (error) {
                 showError('initialization', error);
