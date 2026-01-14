@@ -22,33 +22,43 @@
         .header {
             background: #2d2d2d;
             color: white;
-            padding: 40px 24px;
+            padding: 20px 24px;
             border-bottom: 1px solid #3d3d3d;
         }
 
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header-text {
+            flex: 1;
+            min-width: 300px;
         }
 
         .header h1 {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
             letter-spacing: -0.3px;
         }
 
         .header p {
-            font-size: 15px;
-            opacity: 0.85;
+            font-size: 14px;
+            opacity: 0.8;
             font-weight: 400;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .data-version {
-            margin-top: 12px;
-            font-size: 12px;
-            opacity: 0.6;
+            font-size: 11px;
+            opacity: 0.5;
+            margin-top: 4px;
         }
 
         .nav {
@@ -340,6 +350,109 @@
 
         .sidebar-header.collapsed .sidebar-toggle-icon {
             transform: rotate(180deg);
+        }
+
+        .map-sidebar.collapsed {
+            width: auto;
+            min-width: 0;
+        }
+
+        .map-sidebar.collapsed .sidebar-sort,
+        .map-sidebar.collapsed .hotspots-list,
+        .map-sidebar.collapsed .sidebar-header p {
+            display: none;
+        }
+
+        .map-sidebar.collapsed .sidebar-header {
+            padding: 14px 18px;
+        }
+
+        .map-sidebar.collapsed .sidebar-header h3 {
+            font-size: 13px;
+        }
+
+        /* Heatmap Legend */
+        .heatmap-legend {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            z-index: 1000;
+            font-size: 11px;
+            display: none;
+        }
+
+        .heatmap-legend.show {
+            display: block;
+        }
+
+        .heatmap-legend h4 {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .legend-scale {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .legend-gradient {
+            width: 100px;
+            height: 12px;
+            border-radius: 2px;
+            background: linear-gradient(to right, #fee5d9, #fcae91, #fb6a4a, #de2d26, #a50f15);
+        }
+
+        .legend-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            color: #666;
+            font-size: 10px;
+        }
+
+        /* Day Pills */
+        .day-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .day-pill {
+            padding: 6px 10px;
+            background: #fefefe;
+            border: 1px solid #d5d2ca;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: #555;
+        }
+
+        .day-pill:hover {
+            border-color: #999;
+            background: #f5f4f0;
+        }
+
+        .day-pill.active {
+            background: #2d2d2d;
+            color: white;
+            border-color: #2d2d2d;
+        }
+
+        .day-pill-group {
+            display: flex;
+            gap: 4px;
+            padding: 4px 8px;
+            background: #f5f4f0;
+            border-radius: 20px;
         }
 
         .sidebar-header p {
@@ -979,9 +1092,11 @@
 
     <div class="header">
         <div class="header-content">
-            <h1>Stamford Traffic Safety Explorer</h1>
-            <p>Five years of injury and fatal crashes, mapped and analyzed. Focused on where pedestrians and cyclists are most exposed.</p>
-            <div class="data-version" id="dataVersion">Loading data version...</div>
+            <div class="header-text">
+                <h1>Stamford Traffic Safety Explorer</h1>
+                <p>Five years of injury and fatal crashes. Focus on pedestrian and cyclist safety.</p>
+                <div class="data-version" id="dataVersion">Loading...</div>
+            </div>
         </div>
     </div>
 
@@ -1038,13 +1153,20 @@
                         </select>
                     </div>
 
-                    <div class="filter-group">
+                    <div class="filter-group full-width">
                         <label>Day of Week</label>
-                        <select id="dayFilter" onchange="applyFilters()">
-                            <option value="all">All Days</option>
-                            <option value="weekday">Weekdays</option>
-                            <option value="weekend">Weekends</option>
-                        </select>
+                        <div class="day-pills" id="dayPills">
+                            <span class="day-pill active" data-day="all">All</span>
+                            <span class="day-pill" data-day="weekday">Weekdays</span>
+                            <span class="day-pill" data-day="weekend">Weekends</span>
+                            <span class="day-pill" data-day="mon">Mon</span>
+                            <span class="day-pill" data-day="tue">Tue</span>
+                            <span class="day-pill" data-day="wed">Wed</span>
+                            <span class="day-pill" data-day="thu">Thu</span>
+                            <span class="day-pill" data-day="fri">Fri</span>
+                            <span class="day-pill" data-day="sat">Sat</span>
+                            <span class="day-pill" data-day="sun">Sun</span>
+                        </div>
                     </div>
 
                     <div class="filter-group">
@@ -1097,24 +1219,34 @@
         </div>
 
         <!-- RIGHT SIDEBAR - HOTSPOTS -->
-        <div class="map-sidebar">
+        <div class="map-sidebar collapsed" id="mapSidebar">
             <div class="sidebar-header" id="sidebarHeader" onclick="toggleHotspotsList()">
                 <div class="sidebar-header-top">
                     <h3>High-Risk Locations</h3>
-                    <span class="sidebar-toggle-icon" id="sidebarToggleIcon">&#9650;</span>
+                    <span class="sidebar-toggle-icon" id="sidebarToggleIcon">&#9660;</span>
                 </div>
-                <p>Locations with the most injury and fatal crashes. Click to explore.</p>
+                <p>Locations ranked by crash frequency and severity.</p>
             </div>
             <div class="sidebar-sort" id="sidebarSort">
-                <label>Sort by:</label>
+                <label>Sort:</label>
                 <select id="hotspotSortSelect" onchange="sortHotspots()">
                     <option value="score">Risk Score</option>
                     <option value="crashes">Most Crashes</option>
-                    <option value="fatal">Most Fatalities</option>
-                    <option value="ped">Most Ped/Cyclist</option>
+                    <option value="fatal">Fatalities</option>
+                    <option value="ped">Ped/Cyclist</option>
                 </select>
             </div>
             <div class="hotspots-list" id="hotspotsList"></div>
+        </div>
+
+        <!-- Heatmap Legend -->
+        <div class="heatmap-legend" id="heatmapLegend">
+            <h4>Crash Density</h4>
+            <div class="legend-gradient"></div>
+            <div class="legend-labels">
+                <span>Low</span>
+                <span>High</span>
+            </div>
         </div>
 
         <div id="map"></div>
@@ -1348,7 +1480,7 @@
         let currentCrashLists = {};
         let testResults = {};
         let tilesLoaded = false;
-        let hotspotsExpanded = true;
+        let hotspotsExpanded = false;
 
         // Data loading with cache-busting
         async function loadData() {
@@ -1484,6 +1616,16 @@
                 });
             });
 
+            // Day pill click handlers
+            document.querySelectorAll('.day-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('.day-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    activeFilters.day = pill.getAttribute('data-day');
+                    applyFilters();
+                });
+            });
+
             updateFilterCount();
         }
 
@@ -1524,11 +1666,15 @@
             if (isNaN(year) || isNaN(month) || isNaN(day)) return false;
             const date = new Date(year, month, day);
             if (isNaN(date.getTime())) return false;
-            const dayOfWeek = date.getDay();
+            const dayOfWeek = date.getDay(); // 0=Sun, 1=Mon, ... 6=Sat
+
+            const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
 
             switch(activeFilters.day) {
                 case 'weekday': return dayOfWeek >= 1 && dayOfWeek <= 5;
                 case 'weekend': return dayOfWeek === 0 || dayOfWeek === 6;
+                case 'sun': case 'mon': case 'tue': case 'wed': case 'thu': case 'fri': case 'sat':
+                    return dayOfWeek === dayMap[activeFilters.day];
                 default: return true;
             }
         }
@@ -1628,28 +1774,70 @@
             heatmapLayer = L.layerGroup();
             const filteredCrashes = getFilteredCrashes();
 
+            // Create grid-based density calculation
+            const gridSize = 0.003; // ~300m cells
+            const grid = {};
+
             filteredCrashes.forEach(crash => {
-                const weight = crash.severity === 'fatal' ? 3 : crash.type === 'pedestrian' || crash.type === 'cyclist' ? 2.5 : 2;
-                const circle = L.circle([crash.lat, crash.lng], {
-                    radius: 40 * weight,
-                    fillColor: getMarkerColor(crash),
-                    fillOpacity: 0.15,
+                const gridX = Math.floor(crash.lng / gridSize);
+                const gridY = Math.floor(crash.lat / gridSize);
+                const key = `${gridX},${gridY}`;
+
+                if (!grid[key]) {
+                    grid[key] = { count: 0, weight: 0, lat: 0, lng: 0 };
+                }
+
+                // Weight by severity
+                const weight = crash.severity === 'fatal' ? 5 :
+                              (crash.type === 'pedestrian' || crash.type === 'cyclist') ? 3 : 1;
+
+                grid[key].count++;
+                grid[key].weight += weight;
+                grid[key].lat += crash.lat;
+                grid[key].lng += crash.lng;
+            });
+
+            // Find max weight for normalization
+            const maxWeight = Math.max(...Object.values(grid).map(g => g.weight), 1);
+
+            // Color scale (red gradient)
+            const getHeatColor = (intensity) => {
+                const colors = ['#fee5d9', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#99000d'];
+                const idx = Math.min(Math.floor(intensity * (colors.length - 1)), colors.length - 1);
+                return colors[idx];
+            };
+
+            // Render density circles
+            Object.values(grid).forEach(cell => {
+                const centerLat = cell.lat / cell.count;
+                const centerLng = cell.lng / cell.count;
+                const intensity = cell.weight / maxWeight;
+                const radius = 80 + (intensity * 120); // 80-200m radius
+
+                const circle = L.circle([centerLat, centerLng], {
+                    radius: radius,
+                    fillColor: getHeatColor(intensity),
+                    fillOpacity: 0.5 + (intensity * 0.3),
                     stroke: false
                 });
                 heatmapLayer.addLayer(circle);
             });
 
             heatmapLayer.addTo(map);
+
+            // Show legend
+            document.getElementById('heatmapLegend').classList.add('show');
         }
 
         function hideHeatmap() {
             if (heatmapLayer) map.removeLayer(heatmapLayer);
+            document.getElementById('heatmapLegend').classList.remove('show');
         }
 
         function applyFilters() {
             activeFilters.year = document.getElementById('yearFilter').value;
             activeFilters.time = document.getElementById('timeFilter').value;
-            activeFilters.day = document.getElementById('dayFilter').value;
+            // day is set via pill click, not select
             activeFilters.lighting = document.getElementById('lightingFilter').value;
             activeFilters.weather = document.getElementById('weatherFilter').value;
 
@@ -1676,7 +1864,9 @@
             document.querySelector('input[name="crashFilter"][value="all"]').checked = true;
             document.getElementById('yearFilter').value = 'all';
             document.getElementById('timeFilter').value = 'all';
-            document.getElementById('dayFilter').value = 'all';
+            // Reset day pills
+            document.querySelectorAll('.day-pill').forEach(p => p.classList.remove('active'));
+            document.querySelector('.day-pill[data-day="all"]').classList.add('active');
             document.getElementById('lightingFilter').value = 'all';
             document.getElementById('weatherFilter').value = 'all';
 
@@ -1703,7 +1893,7 @@
                     crashType: { 'fatal': 'Fatal only', 'pedestrian': 'Ped/Cyclist' },
                     year: {},
                     time: { 'morning': 'Morning', 'midday': 'Midday', 'afternoon': 'Afternoon', 'evening': 'Evening', 'night': 'Night' },
-                    day: { 'weekday': 'Weekdays', 'weekend': 'Weekends' },
+                    day: { 'weekday': 'Weekdays', 'weekend': 'Weekends', 'mon': 'Monday', 'tue': 'Tuesday', 'wed': 'Wednesday', 'thu': 'Thursday', 'fri': 'Friday', 'sat': 'Saturday', 'sun': 'Sunday' },
                     lighting: { 'daylight': 'Daylight', 'dark': 'Dark', 'dusk': 'Dusk/Dawn' },
                     weather: { 'clear': 'Clear', 'rain': 'Rain', 'snow': 'Snow/Ice' }
                 };
@@ -1727,22 +1917,16 @@
 
         // Hotspots sidebar toggle
         function toggleHotspotsList() {
-            const hotspotsList = document.getElementById('hotspotsList');
-            const sidebarSort = document.getElementById('sidebarSort');
-            const sidebarHeader = document.getElementById('sidebarHeader');
+            const sidebar = document.getElementById('mapSidebar');
             const toggleIcon = document.getElementById('sidebarToggleIcon');
 
             hotspotsExpanded = !hotspotsExpanded;
 
             if (hotspotsExpanded) {
-                hotspotsList.classList.remove('collapsed');
-                sidebarSort.classList.remove('collapsed');
-                sidebarHeader.classList.remove('collapsed');
+                sidebar.classList.remove('collapsed');
                 toggleIcon.innerHTML = '&#9650;';
             } else {
-                hotspotsList.classList.add('collapsed');
-                sidebarSort.classList.add('collapsed');
-                sidebarHeader.classList.add('collapsed');
+                sidebar.classList.add('collapsed');
                 toggleIcon.innerHTML = '&#9660;';
             }
         }
