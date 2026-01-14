@@ -1059,6 +1059,73 @@
             margin: 0;
         }
 
+        /* First-visit intro popup */
+        .intro-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .intro-popup {
+            background: #fefefe;
+            border-radius: 12px;
+            max-width: 380px;
+            width: 100%;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .intro-popup h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #2d2d2d;
+            margin-bottom: 12px;
+        }
+
+        .intro-popup p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .intro-popup p:last-of-type {
+            margin-bottom: 20px;
+        }
+
+        .intro-popup-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: #4a4a4a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .intro-popup-btn:hover {
+            background: #333;
+        }
+
+        /* Stamford boundary styling */
+        .stamford-boundary {
+            fill: none;
+            stroke: #888;
+            stroke-width: 1.5;
+            stroke-opacity: 0.4;
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 16px 16px 12px;
@@ -1096,7 +1163,7 @@
                 width: 100%;
             }
 
-            /* Filters as compact bottom sheet */
+            /* Filters as swipeable bottom sheet */
             .map-controls {
                 position: fixed;
                 bottom: 0;
@@ -1106,23 +1173,36 @@
                 max-width: none;
                 width: 100%;
                 border-radius: 16px 16px 0 0;
-                max-height: 60vh;
+                max-height: 65vh;
                 overflow-y: auto;
                 z-index: 1001;
-                transform: translateY(calc(100% - 60px));
+                transform: translateY(calc(100% - 52px));
                 transition: transform 0.3s ease;
+                touch-action: none;
             }
 
             .map-controls.expanded {
                 transform: translateY(0);
+                overflow-y: auto;
+            }
+
+            .map-controls.dragging {
+                transition: none;
             }
 
             .map-controls .controls-header {
-                cursor: pointer;
+                cursor: grab;
                 position: sticky;
                 top: 0;
                 z-index: 10;
-                padding-top: 20px;
+                padding-top: 16px;
+                padding-bottom: 8px;
+                background: #fefefe;
+                border-radius: 16px 16px 0 0;
+            }
+
+            .map-controls .controls-header:active {
+                cursor: grabbing;
             }
 
             /* Drag handle bar */
@@ -1132,24 +1212,24 @@
                 top: 8px;
                 left: 50%;
                 transform: translateX(-50%);
-                width: 36px;
-                height: 4px;
-                background: #ccc;
-                border-radius: 2px;
+                width: 40px;
+                height: 5px;
+                background: #d0d0d0;
+                border-radius: 3px;
             }
 
             .map-controls .controls-header::after {
-                content: 'Tap to expand';
+                content: 'Filters';
                 display: block;
                 text-align: center;
-                font-size: 10px;
-                color: #999;
-                margin-top: 6px;
-                letter-spacing: 0.3px;
+                font-size: 11px;
+                font-weight: 500;
+                color: #888;
+                margin-top: 2px;
             }
 
             .map-controls.expanded .controls-header::after {
-                content: 'Tap to close';
+                content: '';
             }
 
             /* Hotspots hidden by default on mobile, shown via button */
@@ -1274,6 +1354,16 @@
     <div class="loading" id="loading">
         <div class="spinner"></div>
         <div class="loading-text">Loading crash data...</div>
+    </div>
+
+    <!-- First-visit intro popup -->
+    <div class="intro-popup-overlay" id="introPopup" style="display: none;">
+        <div class="intro-popup">
+            <h3>Welcome to the Stamford Traffic Safety Explorer</h3>
+            <p>This map shows injury and fatal crashes in Stamford over the last five years. Use the filters to explore by year, time of day, or crash type.</p>
+            <p>Toggle "Density" to see where crashes concentrate. Tap any marker or hotspot for details.</p>
+            <button class="intro-popup-btn" onclick="dismissIntro()">Got it</button>
+        </div>
     </div>
 
     <div class="header">
@@ -1847,7 +1937,8 @@
         }
 
         function initializeMap() {
-            map = L.map('map').setView([41.0534, -73.5387], 12);
+            // Center on Stamford with zoom level that fills the view
+            map = L.map('map').setView([41.0534, -73.5420], 13);
 
             const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors',
@@ -1856,6 +1947,29 @@
 
             tileLayer.on('load', () => { tilesLoaded = true; });
             tileLayer.addTo(map);
+
+            // Add subtle Stamford municipal boundary
+            const stamfordBoundary = [
+                [41.1270, -73.5870], // NW corner
+                [41.1295, -73.5420], // N
+                [41.1180, -73.4950], // NE
+                [41.0850, -73.4850], // E
+                [41.0400, -73.4920], // SE
+                [41.0050, -73.5050], // S (coast)
+                [41.0020, -73.5350], // SW (coast)
+                [41.0180, -73.5650], // W (coast)
+                [41.0550, -73.5880], // W
+                [41.0950, -73.5920], // NW
+                [41.1270, -73.5870]  // close
+            ];
+
+            L.polygon(stamfordBoundary, {
+                color: '#777',
+                weight: 1.5,
+                opacity: 0.35,
+                fill: false,
+                interactive: false
+            }).addTo(map);
         }
 
         function setupNavigation() {
@@ -1882,10 +1996,81 @@
         }
 
         function setupControls() {
-            // Mobile filter panel toggle
+            // Mobile filter panel - swipeable bottom sheet
             const controlsHeader = document.querySelector('.map-controls .controls-header');
             const mapControls = document.querySelector('.map-controls');
-            if (controlsHeader && mapControls) {
+
+            if (controlsHeader && mapControls && window.innerWidth <= 768) {
+                let startY = 0;
+                let currentY = 0;
+                let isDragging = false;
+                const collapsedOffset = window.innerHeight * 0.65 - 52; // 65vh - 52px peek
+                const expandedOffset = 0;
+
+                // Tap fallback
+                controlsHeader.addEventListener('click', (e) => {
+                    if (!isDragging) {
+                        mapControls.classList.toggle('expanded');
+                    }
+                });
+
+                // Touch start
+                controlsHeader.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                    isDragging = false;
+                    mapControls.classList.add('dragging');
+                }, { passive: true });
+
+                // Touch move - track finger
+                controlsHeader.addEventListener('touchmove', (e) => {
+                    currentY = e.touches[0].clientY;
+                    const deltaY = currentY - startY;
+
+                    if (Math.abs(deltaY) > 10) {
+                        isDragging = true;
+                    }
+
+                    if (isDragging) {
+                        const isExpanded = mapControls.classList.contains('expanded');
+                        let newTranslate;
+
+                        if (isExpanded) {
+                            // When expanded, dragging down increases translateY
+                            newTranslate = Math.max(0, Math.min(collapsedOffset, deltaY));
+                        } else {
+                            // When collapsed, dragging up decreases translateY from collapsed position
+                            newTranslate = Math.max(0, Math.min(collapsedOffset, collapsedOffset + deltaY));
+                        }
+
+                        mapControls.style.transform = `translateY(${newTranslate}px)`;
+                    }
+                }, { passive: true });
+
+                // Touch end - snap to position
+                controlsHeader.addEventListener('touchend', (e) => {
+                    mapControls.classList.remove('dragging');
+
+                    if (isDragging) {
+                        const deltaY = currentY - startY;
+                        const threshold = 50; // px to trigger snap
+                        const isExpanded = mapControls.classList.contains('expanded');
+
+                        if (isExpanded && deltaY > threshold) {
+                            // Swipe down when expanded -> collapse
+                            mapControls.classList.remove('expanded');
+                        } else if (!isExpanded && deltaY < -threshold) {
+                            // Swipe up when collapsed -> expand
+                            mapControls.classList.add('expanded');
+                        }
+
+                        // Reset inline style, let CSS handle position
+                        mapControls.style.transform = '';
+                    }
+
+                    isDragging = false;
+                }, { passive: true });
+            } else if (controlsHeader && mapControls) {
+                // Desktop: simple click toggle (no-op on desktop, but keep structure)
                 controlsHeader.addEventListener('click', (e) => {
                     if (window.innerWidth <= 768) {
                         mapControls.classList.toggle('expanded');
@@ -2721,6 +2906,19 @@
             });
         }
 
+        // First-visit intro popup
+        function showIntroPopup() {
+            const hasSeenIntro = localStorage.getItem('stamford-safety-intro-seen');
+            if (!hasSeenIntro) {
+                document.getElementById('introPopup').style.display = 'flex';
+            }
+        }
+
+        function dismissIntro() {
+            localStorage.setItem('stamford-safety-intro-seen', 'true');
+            document.getElementById('introPopup').style.display = 'none';
+        }
+
         // Main initialization
         document.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -2739,6 +2937,9 @@
                 filterCrashes(currentFilter);
 
                 hideLoading();
+
+                // Show intro popup for first-time visitors
+                showIntroPopup();
 
                 if (isDebugMode) {
                     setTimeout(() => {
