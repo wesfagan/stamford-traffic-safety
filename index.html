@@ -1572,6 +1572,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <script>
         // Debug mode detection
         const isDebugMode = new URLSearchParams(window.location.search).has('debug');
@@ -1904,17 +1905,20 @@
         }
 
         let heatmapGridData = {}; // Store grid data for hover tooltips
+        let hoverLayer = null; // Invisible grid for hover tooltips
 
         function showHeatmap() {
+            // Remove existing layers
             if (heatmapLayer) map.removeLayer(heatmapLayer);
-            heatmapLayer = L.layerGroup();
+            if (hoverLayer) map.removeLayer(hoverLayer);
+
             const filteredCrashes = getFilteredCrashes();
 
             // Hide crash markers when heatmap is on
             crashMarkers.forEach(marker => marker.setStyle({ opacity: 0, fillOpacity: 0 }));
 
-            // Create grid-based density calculation with finer grid for smoothness
-            const gridSize = 0.002; // ~200m cells for smoother blending
+            // Build grid for hover tooltips
+            const gridSize = 0.003; // ~300m cells for hover zones
             heatmapGridData = {};
 
             filteredCrashes.forEach(crash => {
@@ -1925,7 +1929,7 @@
                 if (!heatmapGridData[key]) {
                     heatmapGridData[key] = {
                         count: 0, fatal: 0, injury: 0,
-                        lat: 0, lng: 0, gridX, gridY
+                        lat: 0, lng: 0
                     };
                 }
 
@@ -1936,81 +1940,48 @@
                 else heatmapGridData[key].injury++;
             });
 
-            // Percentile-based normalization (95th percentile as max) so hotspots pop
+            // Percentile-based normalization (95th percentile as max)
             const counts = Object.values(heatmapGridData).map(g => g.count).sort((a, b) => a - b);
             const p95Index = Math.floor(counts.length * 0.95);
             const normMax = counts[p95Index] || counts[counts.length - 1] || 1;
 
-            // Smooth color interpolation
-            const getHeatColor = (intensity) => {
-                // Clamp intensity to 0-1 range
-                const t = Math.min(Math.max(intensity, 0), 1);
-                // Smooth gradient through warm colors
-                if (t < 0.15) return '#fff5f0';
-                if (t < 0.3) return '#fee0d2';
-                if (t < 0.45) return '#fcbba1';
-                if (t < 0.6) return '#fc9272';
-                if (t < 0.75) return '#fb6a4a';
-                if (t < 0.9) return '#de2d26';
-                return '#a50f15';
-            };
+            // Build heatmap data points: [lat, lng, intensity]
+            const heatPoints = filteredCrashes.map(crash => {
+                // Weight by severity
+                const weight = crash.severity === 'fatal' ? 1.0 :
+                              (crash.type === 'pedestrian' || crash.type === 'cyclist') ? 0.7 : 0.5;
+                return [crash.lat, crash.lng, weight];
+            });
 
-            // Render overlapping density zones for kernel-like smoothing
+            // Create canvas heatmap with Leaflet.heat
+            heatmapLayer = L.heatLayer(heatPoints, {
+                radius: 25,        // Base radius in pixels
+                blur: 20,          // Blur for smooth blending
+                maxZoom: 17,       // Max zoom level for scaling
+                max: 1.0,          // Max intensity value
+                minOpacity: 0.3,   // Minimum opacity
+                gradient: {        // Color gradient (compressed low values, hotspots hit red)
+                    0.0: '#fff5f0',
+                    0.2: '#fee0d2',
+                    0.35: '#fcbba1',
+                    0.5: '#fc9272',
+                    0.65: '#fb6a4a',
+                    0.8: '#de2d26',
+                    1.0: '#a50f15'
+                }
+            });
+
+            heatmapLayer.addTo(map);
+
+            // Create invisible hover layer for tooltips
+            hoverLayer = L.layerGroup();
+
             Object.entries(heatmapGridData).forEach(([key, cell]) => {
                 const centerLat = cell.lat / cell.count;
                 const centerLng = cell.lng / cell.count;
-                // Normalize with 95th percentile, allow values above 1 for true hotspots
-                const rawIntensity = cell.count / normMax;
-                const intensity = Math.min(rawIntensity, 1.2); // Cap at 1.2 for color calc
 
-                // Larger, softer radii for smoother blending
-                const baseRadius = 180 + (Math.min(intensity, 1) * 180);
-
-                // Outer diffuse glow (very soft)
-                const outerGlow = L.circle([centerLat, centerLng], {
-                    radius: baseRadius * 2,
-                    fillColor: getHeatColor(intensity * 0.3),
-                    fillOpacity: 0.08,
-                    stroke: false,
-                    interactive: false
-                });
-                heatmapLayer.addLayer(outerGlow);
-
-                // Middle glow
-                const midGlow = L.circle([centerLat, centerLng], {
-                    radius: baseRadius * 1.4,
-                    fillColor: getHeatColor(intensity * 0.6),
-                    fillOpacity: 0.12,
-                    stroke: false,
-                    interactive: false
-                });
-                heatmapLayer.addLayer(midGlow);
-
-                // Main zone
-                const mainCircle = L.circle([centerLat, centerLng], {
-                    radius: baseRadius,
-                    fillColor: getHeatColor(intensity),
-                    fillOpacity: 0.25 + (Math.min(intensity, 1) * 0.2),
-                    stroke: false,
-                    interactive: false
-                });
-                heatmapLayer.addLayer(mainCircle);
-
-                // Inner core for high-density areas (hotspots really pop)
-                if (intensity > 0.5) {
-                    const coreCircle = L.circle([centerLat, centerLng], {
-                        radius: baseRadius * 0.5,
-                        fillColor: getHeatColor(Math.min(intensity * 1.2, 1)),
-                        fillOpacity: 0.35,
-                        stroke: false,
-                        interactive: false
-                    });
-                    heatmapLayer.addLayer(coreCircle);
-                }
-
-                // Invisible interactive zone for hover
                 const hoverZone = L.circle([centerLat, centerLng], {
-                    radius: baseRadius * 1.2,
+                    radius: 200,
                     fillColor: 'transparent',
                     fillOpacity: 0,
                     stroke: false,
@@ -2025,10 +1996,10 @@
                     </div>
                 `, { sticky: true, className: 'heatmap-tooltip' });
 
-                heatmapLayer.addLayer(hoverZone);
+                hoverLayer.addLayer(hoverZone);
             });
 
-            heatmapLayer.addTo(map);
+            hoverLayer.addTo(map);
 
             // Show legend
             document.getElementById('heatmapLegend').classList.add('show');
@@ -2036,6 +2007,7 @@
 
         function hideHeatmap() {
             if (heatmapLayer) map.removeLayer(heatmapLayer);
+            if (hoverLayer) map.removeLayer(hoverLayer);
             document.getElementById('heatmapLegend').classList.remove('show');
 
             // Show crash markers again
