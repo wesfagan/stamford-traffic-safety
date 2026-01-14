@@ -1941,15 +1941,27 @@
             tileLayer.addTo(map);
 
             // Load official Stamford municipal boundary from CT DEEP
+            // Dual-stroke approach: off-white casing + slate-purple core for visibility across all backgrounds
             fetch('data/stamford_boundary.geojson')
                 .then(response => response.json())
                 .then(geojson => {
+                    // Casing layer (bottom): off-white for contrast against dark heatmap/basemap
                     L.geoJSON(geojson, {
                         style: {
-                            color: '#666',
+                            color: '#f5f3ed',
+                            weight: 4,
+                            opacity: 0.8,
+                            fill: false,
+                            interactive: false
+                        }
+                    }).addTo(map);
+
+                    // Core layer (top): muted slate-purple, distinct from blue/red data colors
+                    L.geoJSON(geojson, {
+                        style: {
+                            color: '#5d5a6d',
                             weight: 2,
-                            opacity: 0.5,
-                            dashArray: '6, 4',
+                            opacity: 0.75,
                             fill: false,
                             interactive: false
                         }
