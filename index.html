@@ -21,7 +21,7 @@
 
         .header {
             background: linear-gradient(rgba(30, 30, 30, 0.75), rgba(30, 30, 30, 0.85)),
-                        url('images/banner.jpg') center/cover no-repeat;
+                        url('images/banner.jpg') center 70%/cover no-repeat;
             color: white;
             padding: 32px 24px 24px;
             border-bottom: 1px solid #3d3d3d;
@@ -1590,6 +1590,7 @@
         let crashMarkers = [];
         let crashMarkersIndex = {};
         let heatmapLayer;
+        let heatPoints = [];
         let currentFilter = 'all';
         let activeFilters = {
             crashType: 'all',
@@ -1605,6 +1606,79 @@
         let testResults = {};
         let tilesLoaded = false;
         let hotspotsExpanded = false;
+
+        // Zoom-dependent heatmap options: "thunderstorm" when zoomed out, softer when zoomed in
+        function getHeatmapOptions(zoom) {
+            if (zoom <= 12) {
+                // Zoomed out: tight, intense "storm eye" look
+                return {
+                    radius: 18,
+                    blur: 12,
+                    maxZoom: 17,
+                    max: 1.0,
+                    minOpacity: 0.4,
+                    gradient: {
+                        0.0: '#fff5f0',
+                        0.15: '#fee0d2',
+                        0.3: '#fcbba1',
+                        0.45: '#fc9272',
+                        0.6: '#fb6a4a',
+                        0.75: '#ef3b2c',
+                        0.85: '#cb181d',
+                        0.95: '#ffff00',  // Severe yellow hotspots
+                        1.0: '#ffcc00'
+                    }
+                };
+            } else if (zoom <= 14) {
+                // Mid zoom: transitional
+                return {
+                    radius: 22,
+                    blur: 16,
+                    maxZoom: 17,
+                    max: 1.0,
+                    minOpacity: 0.35,
+                    gradient: {
+                        0.0: '#fff5f0',
+                        0.2: '#fee0d2',
+                        0.35: '#fcbba1',
+                        0.5: '#fc9272',
+                        0.65: '#fb6a4a',
+                        0.8: '#de2d26',
+                        0.9: '#cb181d',
+                        1.0: '#a50f15'
+                    }
+                };
+            } else {
+                // Zoomed in: soft, spread out, less harsh
+                return {
+                    radius: 30,
+                    blur: 25,
+                    maxZoom: 17,
+                    max: 1.0,
+                    minOpacity: 0.25,
+                    gradient: {
+                        0.0: '#fff5f0',
+                        0.25: '#fee0d2',
+                        0.4: '#fcbba1',
+                        0.55: '#fc9272',
+                        0.7: '#fb6a4a',
+                        0.85: '#de2d26',
+                        1.0: '#a50f15'
+                    }
+                };
+            }
+        }
+
+        function updateHeatmapStyle() {
+            if (!heatmapLayer || !map) return;
+            const zoom = map.getZoom();
+            const options = getHeatmapOptions(zoom);
+
+            // Remove old layer and create new one with updated options
+            map.removeLayer(heatmapLayer);
+            heatmapLayer = L.heatLayer(heatPoints, options);
+            heatmapLayer.addTo(map);
+        }
 
         // Data loading with cache-busting
         async function loadData() {
@@ -1946,32 +2020,20 @@
             const normMax = counts[p95Index] || counts[counts.length - 1] || 1;
 
             // Build heatmap data points: [lat, lng, intensity]
-            const heatPoints = filteredCrashes.map(crash => {
+            heatPoints = filteredCrashes.map(crash => {
                 // Weight by severity
                 const weight = crash.severity === 'fatal' ? 1.0 :
                               (crash.type === 'pedestrian' || crash.type === 'cyclist') ? 0.7 : 0.5;
                 return [crash.lat, crash.lng, weight];
             });
 
-            // Create canvas heatmap with Leaflet.heat
-            heatmapLayer = L.heatLayer(heatPoints, {
-                radius: 25,        // Base radius in pixels
-                blur: 20,          // Blur for smooth blending
-                maxZoom: 17,       // Max zoom level for scaling
-                max: 1.0,          // Max intensity value
-                minOpacity: 0.3,   // Minimum opacity
-                gradient: {        // Color gradient (compressed low values, hotspots hit red)
-                    0.0: '#fff5f0',
-                    0.2: '#fee0d2',
-                    0.35: '#fcbba1',
-                    0.5: '#fc9272',
-                    0.65: '#fb6a4a',
-                    0.8: '#de2d26',
-                    1.0: '#a50f15'
-                }
-            });
-
+            // Create canvas heatmap with zoom-dependent styling
+            const options = getHeatmapOptions(map.getZoom());
+            heatmapLayer = L.heatLayer(heatPoints, options);
             heatmapLayer.addTo(map);
+
+            // Update heatmap style on zoom
+            map.on('zoomend', updateHeatmapStyle);
 
             // Create invisible hover layer for tooltips
             hoverLayer = L.layerGroup();
@@ -2006,6 +2068,9 @@
         }
 
         function hideHeatmap() {
+            // Remove zoom listener
+            map.off('zoomend', updateHeatmapStyle);
+
             if (heatmapLayer) map.removeLayer(heatmapLayer);
             if (hoverLayer) map.removeLayer(hoverLayer);
             document.getElementById('heatmapLegend').classList.remove('show');
