@@ -21,7 +21,7 @@
 
         .header {
             background: linear-gradient(rgba(30, 30, 30, 0.75), rgba(30, 30, 30, 0.85)),
-                        url('images/banner.jpg') center 70%/cover no-repeat;
+                        url('images/banner.jpg') center 80%/cover no-repeat;
             color: white;
             padding: 32px 24px 24px;
             border-bottom: 1px solid #3d3d3d;
@@ -424,7 +424,7 @@
             width: 100px;
             height: 12px;
             border-radius: 2px;
-            background: linear-gradient(to right, #fee5d9, #fcae91, #fb6a4a, #de2d26, #a50f15);
+            background: linear-gradient(to right, #deebf7, #9ecae1, #fcbba1, #fb6a4a, #de2d26, #a50f15);
         }
 
         .legend-labels {
@@ -1694,6 +1694,7 @@
         let hotspotsExpanded = false;
 
         // Zoom-dependent heatmap options: "thunderstorm" when zoomed out, softer when zoomed in
+        // Color scale: cool tones (blue/teal) for low-mid density, warm (orange/red) for high, yellow only at extreme peaks
         function getHeatmapOptions(zoom) {
             if (zoom <= 12) {
                 // Zoomed out: tight, intense "storm eye" look
@@ -1702,17 +1703,20 @@
                     blur: 12,
                     maxZoom: 17,
                     max: 1.0,
-                    minOpacity: 0.4,
+                    minOpacity: 0.35,
                     gradient: {
-                        0.0: '#fff5f0',
-                        0.15: '#fee0d2',
-                        0.3: '#fcbba1',
-                        0.45: '#fc9272',
-                        0.6: '#fb6a4a',
-                        0.75: '#ef3b2c',
-                        0.85: '#cb181d',
-                        0.95: '#ffff00',  // Severe yellow hotspots
-                        1.0: '#ffcc00'
+                        0.0: '#f7fbff',   // Very light blue
+                        0.1: '#deebf7',   // Light blue
+                        0.2: '#c6dbef',   // Blue
+                        0.3: '#9ecae1',   // Medium blue
+                        0.4: '#6baed6',   // Teal-blue
+                        0.5: '#fcbba1',   // Transition to warm - light salmon
+                        0.6: '#fc9272',   // Salmon
+                        0.7: '#fb6a4a',   // Orange-red
+                        0.8: '#de2d26',   // Red
+                        0.9: '#a50f15',   // Dark red
+                        0.98: '#ffcc00',  // Yellow only at extreme peaks
+                        1.0: '#ffff00'
                     }
                 };
             } else if (zoom <= 14) {
@@ -1722,34 +1726,36 @@
                     blur: 16,
                     maxZoom: 17,
                     max: 1.0,
-                    minOpacity: 0.35,
+                    minOpacity: 0.3,
                     gradient: {
-                        0.0: '#fff5f0',
-                        0.2: '#fee0d2',
-                        0.35: '#fcbba1',
-                        0.5: '#fc9272',
-                        0.65: '#fb6a4a',
-                        0.8: '#de2d26',
-                        0.9: '#cb181d',
+                        0.0: '#f7fbff',
+                        0.15: '#deebf7',
+                        0.25: '#c6dbef',
+                        0.35: '#9ecae1',
+                        0.45: '#6baed6',
+                        0.55: '#fcbba1',
+                        0.65: '#fc9272',
+                        0.75: '#fb6a4a',
+                        0.85: '#de2d26',
                         1.0: '#a50f15'
                     }
                 };
             } else {
-                // Zoomed in: soft, spread out, less harsh
+                // Zoomed in: soft, spread out, calmer
                 return {
                     radius: 30,
                     blur: 25,
                     maxZoom: 17,
                     max: 1.0,
-                    minOpacity: 0.25,
+                    minOpacity: 0.2,
                     gradient: {
-                        0.0: '#fff5f0',
-                        0.25: '#fee0d2',
-                        0.4: '#fcbba1',
-                        0.55: '#fc9272',
-                        0.7: '#fb6a4a',
-                        0.85: '#de2d26',
-                        1.0: '#a50f15'
+                        0.0: '#f7fbff',
+                        0.2: '#deebf7',
+                        0.35: '#c6dbef',
+                        0.5: '#9ecae1',
+                        0.65: '#fcbba1',
+                        0.8: '#fc9272',
+                        1.0: '#de2d26'
                     }
                 };
             }
