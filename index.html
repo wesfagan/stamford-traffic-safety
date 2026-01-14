@@ -1118,14 +1118,6 @@
             background: #333;
         }
 
-        /* Stamford boundary styling */
-        .stamford-boundary {
-            fill: none;
-            stroke: #888;
-            stroke-width: 1.5;
-            stroke-opacity: 0.4;
-        }
-
         @media (max-width: 768px) {
             .header {
                 padding: 16px 16px 12px;
@@ -1948,28 +1940,22 @@
             tileLayer.on('load', () => { tilesLoaded = true; });
             tileLayer.addTo(map);
 
-            // Add subtle Stamford municipal boundary
-            const stamfordBoundary = [
-                [41.1270, -73.5870], // NW corner
-                [41.1295, -73.5420], // N
-                [41.1180, -73.4950], // NE
-                [41.0850, -73.4850], // E
-                [41.0400, -73.4920], // SE
-                [41.0050, -73.5050], // S (coast)
-                [41.0020, -73.5350], // SW (coast)
-                [41.0180, -73.5650], // W (coast)
-                [41.0550, -73.5880], // W
-                [41.0950, -73.5920], // NW
-                [41.1270, -73.5870]  // close
-            ];
-
-            L.polygon(stamfordBoundary, {
-                color: '#777',
-                weight: 1.5,
-                opacity: 0.35,
-                fill: false,
-                interactive: false
-            }).addTo(map);
+            // Load official Stamford municipal boundary from CT DEEP
+            fetch('data/stamford_boundary.geojson')
+                .then(response => response.json())
+                .then(geojson => {
+                    L.geoJSON(geojson, {
+                        style: {
+                            color: '#666',
+                            weight: 2,
+                            opacity: 0.5,
+                            dashArray: '6, 4',
+                            fill: false,
+                            interactive: false
+                        }
+                    }).addTo(map);
+                })
+                .catch(err => console.warn('Could not load boundary:', err));
         }
 
         function setupNavigation() {
