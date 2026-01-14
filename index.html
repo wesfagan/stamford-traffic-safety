@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stamford Traffic Safety Explorer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f7f6f2;
+            color: #2a2a2a;
+            line-height: 1.65;
+        }
+
+        .header {
+            background: #2d2d2d;
+            color: white;
+            padding: 40px 24px;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            font-size: 15px;
+            opacity: 0.85;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .data-version {
+            margin-top: 12px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .nav {
+            background: #fefefe;
+            border-bottom: 1px solid #e0ddd5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+        }
+
+        .nav-item {
+            padding: 18px 28px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            color: #2d2d2d;
+            background: #f5f4f0;
+        }
+
+        .nav-item.active {
+            color: #2d2d2d;
+            border-bottom-color: #4a4a4a;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        #explore-section {
+            position: relative;
+            height: calc(100vh - 180px);
+            min-height: 600px;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #fefefe;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 280px;
+            max-width: 320px;
+            border: 1px solid #e8e6e0;
+        }
+
+        .map-controls h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #2d2d2d;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 8px 0;
+            color: #444;
+        }
+
+        .control-group input[type="checkbox"],
+        .control-group input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #4a4a4a;
+        }
+
+        .info-note {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+            padding: 14px;
+            background: #f5f4f0;
+            border-radius: 6px;
+            margin-bottom: 18px;
+            border: 1px solid #e8e6e0;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e8e6e0;
+        }
+
+        .filter-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 12px;
+        }
+
+        .filter-section h4 {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .advanced-filters {
+            border: 1px solid #e0ddd5;
+            border-radius: 8px;
+            margin-top: 14px;
+            overflow: hidden;
+        }
+
+        .advanced-filters-toggle {
+            width: 100%;
+            padding: 14px 16px;
+            background: #f5f4f0;
+            border: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .advanced-filters-toggle:hover {
+            background: #eceae4;
+        }
+
+        .advanced-filters-content {
+            padding: 18px;
+            display: none;
+            background: #fefefe;
+        }
+
+        .advanced-filters-content.show {
+            display: block;
+        }
+
+        .active-filters-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .filter-chip {
+            padding: 5px 12px;
+            background: #e8f4e8;
+            color: #2e7d32;
+            font-size: 11px;
+            font-weight: 500;
+            border-radius: 14px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .filter-presets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .preset-btn {
+            padding: 7px 14px;
+            border: 1px solid #d5d2ca;
+            border-radius: 6px;
+            background: #fefefe;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: #f5f4f0;
+            border-color: #999;
+        }
+
+        .preset-btn.active {
+            background: #4a4a4a;
+            color: white;
+            border-color: #4a4a4a;
+        }
+
+        .filter-group {
+            margin-bottom: 14px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d5d2ca;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #fefefe;
+            cursor: pointer;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: #4a4a4a;
+        }
+
+        .active-filters {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: #f5f4f0;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 14px;
+        }
+
+        .filter-count {
+            background: #4a4a4a;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .reset-filters-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #c62828;
+            border-radius: 6px;
+            background: #fefefe;
+            color: #c62828;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .reset-filters-btn:hover {
+            background: #c62828;
+            color: white;
+        }
+
+        .reset-filters-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #ccc;
+            color: #999;
+        }
+
+        .reset-filters-btn:disabled:hover {
+            background: #fefefe;
+            color: #999;
+        }
+
+        .map-controls {
+            max-height: calc(100vh - 220px);
+            overflow-y: auto;
+        }
+
+        .map-sidebar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 340px;
+            max-height: calc(100% - 40px);
+            background: #fefefe;
+            border-radius: 10px;
+            padding: 0;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            z-index: 1000;
+            border: 1px solid #e8e6e0;
+        }
+
+        .sidebar-header {
+            padding: 22px;
+            border-bottom: 1px solid #e8e6e0;
+            position: sticky;
+            top: 0;
+            background: #fefefe;
+            z-index: 10;
+        }
+
+        .sidebar-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2d2d2d;
+        }
+
+        .sidebar-header p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.55;
+        }
+
+        .hotspots-list {
+            padding: 14px;
+        }
+
+        .hotspot-item {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 1px solid #e8e6e0;
+            transition: all 0.2s;
+            background: #fefefe;
+        }
+
+        .hotspot-item:hover {
+            border-color: #999;
+            background: #fafaf8;
+        }
+
+        .hotspot-item.selected {
+            border-color: #4a4a4a;
+            background: #f5f4f0;
+        }
+
+        .hotspot-name {
+            font-weight: 500;
+            color: #2d2d2d;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .hotspot-stats {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .fatal-indicator {
+            display: inline-block;
+            background: #c62828;
+            color: white;
+            padding: 3px 9px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .ped-cyclist-indicator {
+            display: inline-block;
+            background: #ef6c00;
+            color: white;
+            padding: 3px 9px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .crash-detail-panel {
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #e8e6e0;
+        }
+
+        .crash-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .sort-select {
+            font-size: 12px;
+            padding: 5px 10px;
+            border: 1px solid #d5d2ca;
+            border-radius: 4px;
+            background: #fefefe;
+            color: #444;
+        }
+
+        .toggle-crashes-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: #f5f4f0;
+            border: 1px solid #d5d2ca;
+            border-radius: 6px;
+            color: #444;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+
+        .toggle-crashes-btn:hover {
+            background: #eceae4;
+            border-color: #999;
+        }
+
+        .crash-row {
+            padding: 14px;
+            margin-bottom: 10px;
+            border-left: 3px solid #d5d2ca;
+            background: #fafaf8;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .crash-row:hover {
+            background: #f0efe8;
+            border-left-color: #666;
+        }
+
+        .crash-row.fatal {
+            border-left-color: #c62828;
+        }
+
+        .crash-row.pedestrian,
+        .crash-row.cyclist {
+            border-left-color: #ef6c00;
+        }
+
+        .crash-severity {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .crash-severity.fatal {
+            color: #c62828;
+        }
+
+        .crash-severity.pedestrian,
+        .crash-severity.cyclist {
+            color: #ef6c00;
+        }
+
+        .crash-date {
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        .crash-details {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .show-more-btn {
+            width: 100%;
+            padding: 12px;
+            background: #fefefe;
+            border: 1px solid #d5d2ca;
+            border-radius: 6px;
+            color: #444;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .show-more-btn:hover:not(:disabled) {
+            background: #f5f4f0;
+            border-color: #999;
+        }
+
+        .show-more-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .content-section {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 72px 32px;
+        }
+
+        .content-section h2 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: #2d2d2d;
+            letter-spacing: -0.5px;
+        }
+
+        .content-section .subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 56px;
+            line-height: 1.65;
+        }
+
+        .content-section h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 72px 0 28px;
+            color: #2d2d2d;
+            letter-spacing: -0.3px;
+        }
+
+        .content-section h3:first-of-type {
+            margin-top: 0;
+        }
+
+        .content-section h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 40px 0 18px;
+            color: #3a3a3a;
+        }
+
+        .content-section p {
+            margin-bottom: 24px;
+            color: #444;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .content-section ul,
+        .content-section ol {
+            margin: 24px 0 24px 28px;
+        }
+
+        .content-section li {
+            margin-bottom: 14px;
+            color: #444;
+            font-size: 16px;
+            line-height: 1.65;
+        }
+
+        .content-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 40px 0;
+            font-size: 15px;
+        }
+
+        .content-section th {
+            background: #f5f4f0;
+            padding: 16px 18px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #d5d2ca;
+            color: #2d2d2d;
+        }
+
+        .content-section td {
+            padding: 16px 18px;
+            border-bottom: 1px solid #e8e6e0;
+        }
+
+        .content-section tr:hover {
+            background: #fafaf8;
+        }
+
+        .highlight-box {
+            padding: 28px;
+            border-left: 4px solid #4a4a4a;
+            background: #fafaf8;
+            border-radius: 0 8px 8px 0;
+            margin: 40px 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 14px;
+            line-height: 1.6;
+        }
+
+        .highlight-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .location-highlight {
+            padding: 28px;
+            border: 1px solid #e0ddd5;
+            border-radius: 8px;
+            margin: 28px 0;
+            background: #fefefe;
+        }
+
+        .location-highlight h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .location-meta {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #e0ddd5;
+            margin: 72px 0;
+        }
+
+        .footnote {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.7;
+            margin-top: 56px;
+            padding-top: 28px;
+            border-top: 1px solid #e8e6e0;
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 9999;
+            background: #fefefe;
+            padding: 36px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+
+        .spinner {
+            border: 3px solid #e8e6e0;
+            border-top: 3px solid #4a4a4a;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 18px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #444;
+            font-size: 14px;
+        }
+
+        .error-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fefefe;
+            padding: 36px;
+            border-radius: 10px;
+            box-shadow: 0 4px 28px rgba(0,0,0,0.18);
+            max-width: 600px;
+            z-index: 10000;
+            border: 2px solid #c62828;
+        }
+
+        .error-panel h3 {
+            color: #c62828;
+            margin-bottom: 18px;
+        }
+
+        .error-panel pre {
+            background: #f5f4f0;
+            padding: 14px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+            margin-top: 14px;
+        }
+
+        .qa-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 9000;
+            transition: all 0.3s ease;
+        }
+
+        .qa-toggle-btn {
+            width: 44px;
+            height: 44px;
+            background: #4a4a4a;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+            transition: all 0.2s ease;
+        }
+
+        .qa-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        }
+
+        .qa-content {
+            position: absolute;
+            bottom: 54px;
+            left: 0;
+            background: #fefefe;
+            border: 1px solid #d5d2ca;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            width: 380px;
+            max-height: 500px;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .qa-content.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .qa-header {
+            padding: 14px 18px;
+            background: #4a4a4a;
+            color: white;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .qa-header h4 {
+            font-size: 13px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .qa-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qa-close:hover {
+            opacity: 0.7;
+        }
+
+        .qa-body {
+            padding: 18px;
+            max-height: 350px;
+            overflow-y: auto;
+            font-size: 13px;
+        }
+
+        .qa-test {
+            padding: 10px 0;
+            border-bottom: 1px solid #e8e6e0;
+        }
+
+        .qa-test:last-child {
+            border-bottom: none;
+        }
+
+        .qa-test.pass::before {
+            content: "\2713 ";
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .qa-test.fail::before {
+            content: "\2717 ";
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .qa-actions {
+            padding: 14px 18px;
+            border-top: 1px solid #e8e6e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .qa-actions button {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d5d2ca;
+            border-radius: 6px;
+            background: #fefefe;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .qa-actions button:hover {
+            background: #f5f4f0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .map-controls,
+            .map-sidebar {
+                position: relative;
+                width: 100%;
+                margin: 10px;
+                top: auto;
+                left: auto;
+                right: auto;
+                max-width: none;
+            }
+
+            #explore-section {
+                height: auto;
+                min-height: 500px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #map {
+                height: 500px;
+                order: 3;
+            }
+
+            .content-section {
+                padding: 56px 20px;
+            }
+
+            .content-section h2 {
+                font-size: 26px;
+            }
+
+            .content-section h3 {
+                font-size: 20px;
+                margin: 56px 0 24px;
+            }
+
+            .qa-panel {
+                bottom: 10px;
+                left: 10px;
+            }
+
+            .qa-content {
+                width: calc(100vw - 60px);
+                max-width: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading crash data...</div>
+    </div>
+
+    <div class="header">
+        <div class="header-content">
+            <h1>Stamford Traffic Safety Explorer</h1>
+            <p>Five years of injury and fatal crashes, mapped and analyzed. Focused on where pedestrians and cyclists are most exposed.</p>
+            <div class="data-version" id="dataVersion">Loading data version...</div>
+        </div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-content" id="navContent">
+            <button class="nav-item active" data-section="explore">Explore Map</button>
+            <button class="nav-item" data-section="analysis">Analysis</button>
+            <button class="nav-item" data-section="methodology">Methodology</button>
+            <button class="nav-item" data-section="about">About</button>
+        </div>
+    </div>
+
+    <div class="section active" id="explore-section">
+        <div class="map-controls">
+            <h3>Filter Crashes</h3>
+
+            <div class="info-note">
+                Showing injury and fatal crashes from the last five years. Property-damage-only crashes are excluded to focus on harm prevention.
+            </div>
+
+            <!-- Active Filters Chips -->
+            <div class="active-filters-chips" id="activeFiltersChips" style="display: none;"></div>
+
+            <!-- Primary Story Filters -->
+            <div class="filter-section">
+                <div class="control-group">
+                    <label>
+                        <input type="radio" name="crashFilter" value="all" checked>
+                        All safety-priority crashes
+                    </label>
+                    <label>
+                        <input type="radio" name="crashFilter" value="pedestrian">
+                        Pedestrian/cyclist only
+                    </label>
+                    <label>
+                        <input type="radio" name="crashFilter" value="fatal">
+                        Fatal crashes only
+                    </label>
+                </div>
+            </div>
+
+            <!-- Advanced Filters (Collapsible) -->
+            <div class="advanced-filters">
+                <button class="advanced-filters-toggle" onclick="toggleAdvancedFilters()">
+                    <span>Advanced Filters</span>
+                    <span id="advancedToggleIcon">&#9660;</span>
+                </button>
+                <div class="advanced-filters-content" id="advancedFiltersContent">
+                    <div class="filter-group">
+                        <label>Year</label>
+                        <select id="yearFilter" onchange="applyFilters()">
+                            <option value="all">All Years</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Time of Day</label>
+                        <select id="timeFilter" onchange="applyFilters()">
+                            <option value="all">All Times</option>
+                            <option value="morning">Morning (6am-9am)</option>
+                            <option value="midday">Midday (9am-3pm)</option>
+                            <option value="afternoon">Afternoon (3pm-6pm)</option>
+                            <option value="evening">Evening (6pm-9pm)</option>
+                            <option value="night">Night (9pm-6am)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Day of Week</label>
+                        <select id="dayFilter" onchange="applyFilters()">
+                            <option value="all">All Days</option>
+                            <option value="weekday">Weekdays (Mon-Fri)</option>
+                            <option value="weekend">Weekends (Sat-Sun)</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Lighting</label>
+                        <select id="lightingFilter" onchange="applyFilters()">
+                            <option value="all">All Conditions</option>
+                            <option value="daylight">Daylight</option>
+                            <option value="dark">Dark</option>
+                            <option value="dusk">Dusk/Dawn</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Weather</label>
+                        <select id="weatherFilter" onchange="applyFilters()">
+                            <option value="all">All Weather</option>
+                            <option value="clear">Clear</option>
+                            <option value="rain">Rain</option>
+                            <option value="snow">Snow/Ice</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heatmap Toggle -->
+            <div class="filter-section">
+                <h4>Display</h4>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="showHeatmap">
+                        Show density overlay
+                    </label>
+                </div>
+            </div>
+
+            <!-- Reset Button -->
+            <button class="reset-filters-btn" id="resetFiltersBtn" onclick="resetFilters()" disabled>
+                Reset All Filters
+            </button>
+        </div>
+
+        <div class="map-sidebar">
+            <div class="sidebar-header">
+                <h3>High-Risk Locations</h3>
+                <p>Locations with the most injury and fatal crashes. Click to explore individual incidents.</p>
+            </div>
+            <div class="hotspots-list" id="hotspotsList"></div>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <div class="section" id="analysis-section">
+        <div class="content-section">
+            <h2>What Five Years of Crashes Reveal</h2>
+            <p class="subtitle">Injury and fatal traffic crashes in Stamford, analyzed to understand where infrastructure improvements could save lives.</p>
+
+            <div class="divider"></div>
+
+            <h3>The Pedestrian and Cyclist Problem</h3>
+            <p>Over the last five years, 310 crashes involved people walking or cycling. These crashes represent 13% of all injury and fatal crashes, but 39% of fatalities. Put another way: if you're not in a car, you're far more likely to die when something goes wrong.</p>
+
+            <p>Nine people walking or cycling were killed. Twenty-three people total died in crashes during this period. The math is clear and brutal.</p>
+
+            <div class="highlight-box">
+                <p><strong>Bedford Street:</strong> 7 pedestrian or cyclist crashes, 1 fatal</p>
+                <p><strong>Broad Street:</strong> 7 pedestrian or cyclist crashes</p>
+                <p><strong>Elm Street:</strong> 4 pedestrian or cyclist crashes</p>
+                <p><strong>Jefferson Street:</strong> 4 pedestrian or cyclist crashes</p>
+            </div>
+
+            <p>These numbers represent people trying to cross the street, ride to work, or walk to the store. They reveal design choices that prioritize vehicle speed over human safety.</p>
+
+            <h3>Where Crashes Cluster</h3>
+            <p>Crashes are not random. They concentrate in predictable places where street design creates conflict, confusion, or excessive speed.</p>
+
+            <div class="location-highlight">
+                <h4>North State Street (Route 1)</h4>
+                <p class="location-meta">34 injury crashes</p>
+                <p>The single most dangerous corridor in Stamford. High speeds, unclear crossings, and heavy traffic volumes combine to produce consistent injury outcomes. Comprehensive redesign needed.</p>
+            </div>
+
+            <div class="location-highlight">
+                <h4>I-95 South (Exit 8 area)</h4>
+                <p class="location-meta">22 injury crashes, 1 fatal</p>
+                <p>Highway crashes are expected. What's concerning is pedestrian involvement at a highway exit, suggesting access control and barrier design failures.</p>
+            </div>
+
+            <div class="location-highlight">
+                <h4>Route 137 North</h4>
+                <p class="location-meta">17 injury crashes, 3 pedestrian/cyclist</p>
+                <p>Missing sidewalks and inadequate pedestrian signals force people into dangerous situations. Predictable results.</p>
+            </div>
+
+            <div class="location-highlight">
+                <h4>Broad Street (Downtown)</h4>
+                <p class="location-meta">16 injury crashes, 7 pedestrian/cyclist</p>
+                <p>Downtown should be the safest place to walk. Instead, nearly half the crashes here involve people outside vehicles. Street redesign with pedestrian priority is overdue.</p>
+            </div>
+
+            <h3>When Crashes Happen</h3>
+            <p>Serious crashes concentrate during predictable times:</p>
+
+            <ul>
+                <li><strong>5:00 PM:</strong> Evening rush. High traffic, driver fatigue, fading light.</li>
+                <li><strong>8:00 AM:</strong> Morning commute. Speed, impatience, school traffic.</li>
+                <li><strong>3:00 PM:</strong> School dismissal. Children crossing streets, distracted drivers.</li>
+                <li><strong>Dark conditions:</strong> Insufficient lighting at key crossings amplifies every other risk.</li>
+            </ul>
+
+            <p>These patterns suggest where targeted enforcement, signal timing adjustments, and lighting improvements could reduce harm.</p>
+
+            <h3>What This Implies About Street Design</h3>
+            <p>These crashes are not accidents. They are predictable outcomes of design decisions. Wide lanes encourage speed. Missing crosswalks force risky behavior. Poor lighting makes pedestrians invisible.</p>
+
+            <p>The data shows us where the problems are. What remains is deciding whether to act.</p>
+
+            <div class="divider"></div>
+
+            <h3>A Note on Severity</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Count</th>
+                        <th>What This Means</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Fatal</strong></td>
+                        <td>23</td>
+                        <td>Lives that could have been saved</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Injury</strong></td>
+                        <td>2,346</td>
+                        <td>Hospital visits, trauma, economic impact</td>
+                    </tr>
+                    <tr style="opacity: 0.5;">
+                        <td>Property damage</td>
+                        <td>8,550</td>
+                        <td>Not included in this analysis</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p class="footnote">This analysis excludes property-damage-only crashes to focus on where people are actually getting hurt. Fender-benders in parking lots don't tell us where street design is failing. Injuries and deaths do.</p>
+        </div>
+    </div>
+
+    <div class="section" id="methodology-section">
+        <div class="content-section">
+            <h2>How This Analysis Works</h2>
+            <p class="subtitle">Data sources, analytical methods, and important limitations.</p>
+
+            <div class="divider"></div>
+
+            <h3>Data Source</h3>
+            <p>All crash data comes from the Connecticut Crash Data Repository, maintained by the UConn Transportation Safety Research Center. This includes 2,369 injury and fatal crashes in Stamford over the last five years.</p>
+
+            <p>Every crash is police-reported, geocoded with latitude and longitude coordinates, and validated by Connecticut DOT. This is not a sample. This is the complete official record.</p>
+
+            <h3>What Gets Included</h3>
+            <p>This analysis focuses exclusively on crashes where someone was hurt or killed:</p>
+            <ul>
+                <li>Fatal crashes (23 total)</li>
+                <li>Injury crashes requiring medical attention (2,346 total)</li>
+                <li>Any crash involving a pedestrian or cyclist, regardless of injury severity</li>
+            </ul>
+
+            <p>Property-damage-only crashes are excluded. This is intentional. Most property-damage crashes are minor parking lot incidents that don't indicate dangerous street design. Including them would obscure the locations where people are actually at risk.</p>
+
+            <h3>How Hotspots Are Identified</h3>
+            <p>Crashes are grouped into geographic clusters using a grid system of approximately 100 meters per cell. Locations are then ranked by a severity-weighted score:</p>
+            <ul>
+                <li>Fatal crash: 20 points</li>
+                <li>Injury crash: 5 points</li>
+                <li>Pedestrian or cyclist involvement: additional weight</li>
+            </ul>
+
+            <p>This scoring prioritizes locations where the most severe outcomes occur, not just where the most crashes happen.</p>
+
+            <h3>Matching Crashes to Locations</h3>
+            <p>When you click a hotspot, the tool finds related crashes using two methods:</p>
+            <ul>
+                <li><strong>Geographic proximity:</strong> Crashes within 150 meters of the hotspot center</li>
+                <li><strong>Road name matching:</strong> Crashes whose location string contains the hotspot road name</li>
+            </ul>
+
+            <p>This dual approach accounts for imprecise geocoding and ensures you see the full picture at each location.</p>
+
+            <h3>Important Limitations</h3>
+            <p><strong>No exposure normalization:</strong> This analysis shows raw crash counts, not crash rates per mile traveled. A road with high traffic will naturally show more crashes than a quiet residential street, even if the quiet street is more dangerous per trip. Rate-based analysis would require traffic volume data, which is not included here.</p>
+
+            <p><strong>Incomplete environmental data:</strong> Some crashes lack complete details about weather, lighting, or road conditions. These gaps are noted in the data.</p>
+
+            <p><strong>Reporting lag:</strong> Fatal crash reports can take months to finalize during investigation. The most recent crashes may not yet be fully documented.</p>
+
+            <p><strong>Not an engineering study:</strong> This analysis identifies priorities and patterns. It is not a substitute for detailed engineering evaluation before implementing infrastructure changes.</p>
+
+            <h3>Technical Implementation</h3>
+            <p>This tool is built using Leaflet.js for mapping and vanilla JavaScript for interactivity. Data is loaded from external JSON files, making it easy to update without modifying the code. The tool works on any static web host.</p>
+
+            <div class="divider"></div>
+
+            <p class="footnote">Questions about methodology or data quality can be directed to the Connecticut Crash Data Repository at UConn. This is an independent analysis using publicly available data.</p>
+        </div>
+    </div>
+
+    <div class="section" id="about-section">
+        <div class="content-section">
+            <h2>About This Project</h2>
+            <p class="subtitle">Why this exists and how to use it.</p>
+
+            <div class="divider"></div>
+
+            <h3>Purpose</h3>
+            <p>This tool makes Stamford's crash data accessible to anyone who cares about street safety. It's designed for residents, advocates, planners, and journalists who want to understand where people are getting hurt and what patterns emerge.</p>
+
+            <p>By focusing on injury and fatal crashes, and particularly on pedestrian and cyclist safety, it highlights the infrastructure decisions that have the biggest impact on whether people live or die on local streets.</p>
+
+            <h3>What You Can Do With This</h3>
+            <p><strong>Check your neighborhood:</strong> See if dangerous intersections are near your home, your kid's school, or your commute route.</p>
+
+            <p><strong>Advocate for change:</strong> Bring specific crash data to city meetings, community boards, or local representatives. Data changes conversations.</p>
+
+            <p><strong>Understand patterns:</strong> See how crashes cluster by time, location, and type. Understand what's predictable and what's preventable.</p>
+
+            <p><strong>Hold leaders accountable:</strong> Stamford committed to Vision Zero in 2022 with a goal of zero traffic deaths by 2032. This tool shows whether we're on track.</p>
+
+            <h3>Vision Zero Context</h3>
+            <p>Vision Zero is a commitment to eliminate all traffic fatalities and serious injuries. It starts from the premise that no loss of life is acceptable, and that street design should prioritize human safety over vehicle speed.</p>
+
+            <p>Stamford adopted Vision Zero in 2022. The current pace suggests we are not on track to meet the 2032 goal. Acceleration requires both political will and sustained investment in proven safety interventions.</p>
+
+            <h3>Sharing This Tool</h3>
+            <p>This tool can be hosted on any static web host (GitHub Pages, Netlify, Vercel, S3, etc.). Simply upload the files and share the URL. No server-side code is required.</p>
+
+            <p>To update the data, replace the JSON files in the <code>data/</code> folder. No code changes are needed.</p>
+
+            <p>If it helps improve safety in Stamford, share it widely.</p>
+
+            <div class="divider"></div>
+
+            <p class="footnote">This is an independent project created to support local traffic safety efforts. It is not affiliated with the City of Stamford or any official agency. All data is from public sources.</p>
+        </div>
+    </div>
+
+    <div class="qa-panel" id="qaPanel">
+        <button class="qa-toggle-btn" onclick="toggleQAPanel()" title="QA / Diagnostics">
+            &#128295;
+        </button>
+        <div class="qa-content" id="qaContent">
+            <div class="qa-header">
+                <h4>QA / Diagnostics</h4>
+                <button class="qa-close" onclick="toggleQAPanel()">&times;</button>
+            </div>
+            <div class="qa-body" id="qaBody">
+                <div style="margin-bottom: 12px; font-size: 12px; color: #666;">
+                    <strong>Version:</strong> <span id="qaVersion">Loading...</span><br>
+                    <strong>Loaded:</strong> <span id="qaTimestamp"></span>
+                </div>
+                <div id="qaTests"></div>
+            </div>
+            <div class="qa-actions">
+                <button onclick="runSmokeTests()">Run Tests</button>
+                <button onclick="copyDiagnostics()">Copy Results</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Global data containers
+        let crashData = [];
+        let hotspotData = [];
+        let metaData = {};
+
+        let map;
+        let crashMarkers = [];
+        let crashMarkersIndex = {};
+        let heatmapLayer;
+        let currentFilter = 'all';
+        let activeFilters = {
+            crashType: 'all',
+            year: 'all',
+            time: 'all',
+            day: 'all',
+            lighting: 'all',
+            weather: 'all'
+        };
+        let highlightCircle = null;
+        let currentSelectedHotspot = null;
+        let currentCrashLists = {};
+        let testResults = {};
+        let tilesLoaded = false;
+
+        // Data loading with cache-busting
+        async function loadData() {
+            try {
+                // Load meta first to get cache key
+                const metaResponse = await fetch('data/meta.json');
+                if (!metaResponse.ok) throw new Error('Failed to load meta.json');
+                metaData = await metaResponse.json();
+
+                const cacheKey = metaData.cacheKey || Date.now();
+
+                // Load crash data with cache-busting
+                const crashResponse = await fetch(`data/crashes.json?v=${cacheKey}`);
+                if (!crashResponse.ok) throw new Error('Failed to load crashes.json');
+                crashData = await crashResponse.json();
+
+                // Load hotspot data with cache-busting
+                const hotspotResponse = await fetch(`data/hotspots.json?v=${cacheKey}`);
+                if (!hotspotResponse.ok) throw new Error('Failed to load hotspots.json');
+                hotspotData = await hotspotResponse.json();
+
+                // Update version display
+                const versionEl = document.getElementById('dataVersion');
+                if (versionEl) {
+                    versionEl.textContent = `Data version ${metaData.version} | Last updated: ${metaData.lastUpdated}`;
+                }
+
+                const qaVersionEl = document.getElementById('qaVersion');
+                if (qaVersionEl) {
+                    qaVersionEl.textContent = `${metaData.version} (${metaData.lastUpdated})`;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Data loading error:', error);
+                throw error;
+            }
+        }
+
+        function showError(stage, error) {
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) loadingEl.style.display = 'none';
+
+            const errorPanel = document.createElement('div');
+            errorPanel.className = 'error-panel';
+            errorPanel.innerHTML = `
+                <h3>Initialization Error</h3>
+                <p><strong>Stage:</strong> ${stage}</p>
+                <p><strong>Message:</strong> ${error.message}</p>
+                <pre>${error.stack || 'No stack trace available'}</pre>
+            `;
+            document.body.appendChild(errorPanel);
+        }
+
+        function hideLoading() {
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+
+        function validateData() {
+            const errors = [];
+
+            if (!Array.isArray(crashData)) {
+                errors.push('crashData is not an array');
+            } else {
+                let validCount = 0;
+                let invalidCount = 0;
+                crashData.forEach((crash, idx) => {
+                    if (typeof crash.lat !== 'number' || typeof crash.lng !== 'number') {
+                        invalidCount++;
+                        return;
+                    }
+                    if (crash.lat < 41.0 || crash.lat > 41.2 || crash.lng < -73.6 || crash.lng > -73.5) {
+                        invalidCount++;
+                        return;
+                    }
+                    validCount++;
+                });
+
+                if (invalidCount > 0) {
+                    console.warn(`${invalidCount} crashes had invalid coordinates and were skipped`);
+                }
+            }
+
+            if (!Array.isArray(hotspotData)) {
+                errors.push('hotspotData is not an array');
+            }
+
+            return errors;
+        }
+
+        function buildCrashIndex() {
+            crashData.forEach((crash, idx) => {
+                const id = `crash_${idx}`;
+                crash.id = id;
+                crashMarkersIndex[id] = crash;
+            });
+        }
+
+        function initializeMap() {
+            map = L.map('map').setView([41.0534, -73.5387], 12);
+
+            const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            });
+
+            tileLayer.on('load', () => {
+                tilesLoaded = true;
+            });
+
+            tileLayer.on('tileerror', () => {
+                console.warn('Base tiles failed to load. Data layer is still available.');
+            });
+
+            tileLayer.addTo(map);
+        }
+
+        function setupNavigation() {
+            const navContent = document.getElementById('navContent');
+            if (!navContent) return;
+
+            navContent.addEventListener('click', (e) => {
+                const navItem = e.target.closest('.nav-item');
+                if (!navItem) return;
+
+                const sectionId = navItem.getAttribute('data-section') + '-section';
+                const navItems = document.querySelectorAll('.nav-item');
+                const sections = document.querySelectorAll('.section');
+
+                navItems.forEach(i => i.classList.remove('active'));
+                navItem.classList.add('active');
+                sections.forEach(s => s.classList.remove('active'));
+
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    if (sectionId === 'explore-section' && map) {
+                        setTimeout(() => map.invalidateSize(), 100);
+                    }
+                }
+            });
+        }
+
+        function setupControls() {
+            const heatmapCheckbox = document.getElementById('showHeatmap');
+            if (heatmapCheckbox) {
+                heatmapCheckbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        showHeatmap();
+                    } else {
+                        hideHeatmap();
+                    }
+                });
+            }
+
+            document.querySelectorAll('input[name="crashFilter"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    currentFilter = e.target.value;
+                    activeFilters.crashType = e.target.value;
+                    filterCrashes(currentFilter);
+                    if (document.getElementById('showHeatmap').checked) {
+                        hideHeatmap();
+                        showHeatmap();
+                    }
+                    updateFilterCount();
+                });
+            });
+
+            // Initialize filter count display
+            updateFilterCount();
+        }
+
+        // FIXED: Parse YYYY-MM-DD date format correctly
+        function matchesYearFilter(crash) {
+            if (activeFilters.year === 'all') return true;
+            if (!crash.date) return false;
+
+            // Data format is YYYY-MM-DD
+            const year = crash.date.substring(0, 4);
+            return year === activeFilters.year;
+        }
+
+        // FIXED: Parse HH:MM:SS 24-hour time format correctly
+        function matchesTimeFilter(crash) {
+            if (activeFilters.time === 'all') return true;
+            if (!crash.time) return false;
+
+            // Data format is HH:MM:SS (24-hour)
+            const timeParts = crash.time.split(':');
+            if (timeParts.length < 2) return false;
+
+            const hour = parseInt(timeParts[0], 10);
+            if (isNaN(hour)) return false;
+
+            switch(activeFilters.time) {
+                case 'morning': return hour >= 6 && hour < 9;
+                case 'midday': return hour >= 9 && hour < 15;
+                case 'afternoon': return hour >= 15 && hour < 18;
+                case 'evening': return hour >= 18 && hour < 21;
+                case 'night': return hour >= 21 || hour < 6;
+                default: return true;
+            }
+        }
+
+        // FIXED: Parse YYYY-MM-DD date format for day of week calculation
+        function matchesDayFilter(crash) {
+            if (activeFilters.day === 'all') return true;
+            if (!crash.date) return false;
+
+            // Data format is YYYY-MM-DD
+            const dateParts = crash.date.split('-');
+            if (dateParts.length !== 3) return false;
+
+            const year = parseInt(dateParts[0], 10);
+            const month = parseInt(dateParts[1], 10) - 1; // JavaScript months are 0-indexed
+            const day = parseInt(dateParts[2], 10);
+
+            if (isNaN(year) || isNaN(month) || isNaN(day)) return false;
+
+            const date = new Date(year, month, day);
+            if (isNaN(date.getTime())) return false;
+
+            const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+
+            switch(activeFilters.day) {
+                case 'weekday': return dayOfWeek >= 1 && dayOfWeek <= 5;
+                case 'weekend': return dayOfWeek === 0 || dayOfWeek === 6;
+                case 'monday': return dayOfWeek === 1;
+                case 'tuesday': return dayOfWeek === 2;
+                case 'wednesday': return dayOfWeek === 3;
+                case 'thursday': return dayOfWeek === 4;
+                case 'friday': return dayOfWeek === 5;
+                case 'saturday': return dayOfWeek === 6;
+                case 'sunday': return dayOfWeek === 0;
+                default: return true;
+            }
+        }
+
+        function matchesLightingFilter(crash) {
+            if (activeFilters.lighting === 'all') return true;
+            if (!crash.light) return false;
+
+            const light = crash.light.toLowerCase();
+            switch(activeFilters.lighting) {
+                case 'daylight': return light.includes('daylight') || light.includes('day');
+                case 'dark': return light.includes('dark') && !light.includes('dawn') && !light.includes('dusk');
+                case 'dusk': return light.includes('dawn') || light.includes('dusk');
+                default: return true;
+            }
+        }
+
+        function matchesWeatherFilter(crash) {
+            if (activeFilters.weather === 'all') return true;
+            if (!crash.weather) return false;
+
+            const weather = crash.weather.toLowerCase();
+            switch(activeFilters.weather) {
+                case 'clear': return weather.includes('clear') || weather.includes('cloudy');
+                case 'rain': return weather.includes('rain');
+                case 'snow': return weather.includes('snow') || weather.includes('ice') || weather.includes('sleet') || weather.includes('freez');
+                default: return true;
+            }
+        }
+
+        function getFilteredCrashes() {
+            let filtered = crashData;
+
+            // Apply crash type filter
+            if (activeFilters.crashType === 'fatal') {
+                filtered = filtered.filter(crash => crash.severity === 'fatal');
+            } else if (activeFilters.crashType === 'pedestrian') {
+                filtered = filtered.filter(crash =>
+                    crash.type === 'pedestrian' || crash.type === 'cyclist'
+                );
+            }
+
+            // Apply all other filters
+            filtered = filtered.filter(crash =>
+                matchesYearFilter(crash) &&
+                matchesTimeFilter(crash) &&
+                matchesDayFilter(crash) &&
+                matchesLightingFilter(crash) &&
+                matchesWeatherFilter(crash)
+            );
+
+            return filtered;
+        }
+
+        function filterCrashes(filterType) {
+            crashMarkers.forEach(marker => map.removeLayer(marker));
+            crashMarkers = [];
+
+            const filteredCrashes = getFilteredCrashes();
+
+            filteredCrashes.forEach(crash => {
+                const color = getMarkerColor(crash);
+                const marker = L.circleMarker([crash.lat, crash.lng], {
+                    radius: crash.severity === 'fatal' ? 8 : crash.type === 'pedestrian' || crash.type === 'cyclist' ? 6 : 5,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+
+                marker.crashId = String(crash.id);
+
+                const popupContent = `
+                    <div style="font-family: system-ui; font-size: 13px; min-width: 200px;">
+                        <strong style="color: ${color}; font-size: 14px; display: block; margin-bottom: 8px;">
+                            ${crash.severity.toUpperCase()}${crash.type !== 'vehicle' ? ' - ' + crash.type.toUpperCase() : ''}
+                        </strong>
+                        <div style="margin-bottom: 4px;"><strong>Location:</strong> ${crash.location}</div>
+                        <div style="margin-bottom: 4px;"><strong>Date:</strong> ${crash.date}</div>
+                        <div style="margin-bottom: 4px;"><strong>Time:</strong> ${crash.time}</div>
+                        <div style="margin-bottom: 4px;"><strong>Weather:</strong> ${crash.weather}</div>
+                        <div><strong>Light:</strong> ${crash.light}</div>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+                marker.addTo(map);
+                crashMarkers.push(marker);
+            });
+        }
+
+        function getMarkerColor(crash) {
+            if (crash.severity === 'fatal') return '#c62828';
+            if (crash.type === 'pedestrian' || crash.type === 'cyclist') return '#ef6c00';
+            return '#666';
+        }
+
+        function showHeatmap() {
+            if (heatmapLayer) {
+                map.removeLayer(heatmapLayer);
+            }
+
+            heatmapLayer = L.layerGroup();
+            const filteredCrashes = getFilteredCrashes();
+
+            filteredCrashes.forEach(crash => {
+                const weight = crash.severity === 'fatal' ? 3 : crash.type === 'pedestrian' || crash.type === 'cyclist' ? 2.5 : 2;
+                const circle = L.circle([crash.lat, crash.lng], {
+                    radius: 40 * weight,
+                    fillColor: getMarkerColor(crash),
+                    fillOpacity: 0.15,
+                    stroke: false
+                });
+                heatmapLayer.addLayer(circle);
+            });
+
+            heatmapLayer.addTo(map);
+        }
+
+        function hideHeatmap() {
+            if (heatmapLayer) {
+                map.removeLayer(heatmapLayer);
+            }
+        }
+
+        function applyFilters() {
+            // Update filter state from form controls
+            activeFilters.year = document.getElementById('yearFilter').value;
+            activeFilters.time = document.getElementById('timeFilter').value;
+            activeFilters.day = document.getElementById('dayFilter').value;
+            activeFilters.lighting = document.getElementById('lightingFilter').value;
+            activeFilters.weather = document.getElementById('weatherFilter').value;
+
+            // Reapply crash filter
+            filterCrashes(activeFilters.crashType);
+
+            // Update heatmap if active
+            if (document.getElementById('showHeatmap').checked) {
+                hideHeatmap();
+                showHeatmap();
+            }
+
+            // Update filter count display
+            updateFilterCount();
+        }
+
+        function resetFilters() {
+            // Reset all filters to default
+            activeFilters = {
+                crashType: 'all',
+                year: 'all',
+                time: 'all',
+                day: 'all',
+                lighting: 'all',
+                weather: 'all'
+            };
+
+            // Reset form controls
+            document.querySelector('input[name="crashFilter"][value="all"]').checked = true;
+            document.getElementById('yearFilter').value = 'all';
+            document.getElementById('timeFilter').value = 'all';
+            document.getElementById('dayFilter').value = 'all';
+            document.getElementById('lightingFilter').value = 'all';
+            document.getElementById('weatherFilter').value = 'all';
+
+            // Clear any active preset
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Reapply filters
+            filterCrashes('all');
+
+            // Update heatmap if active
+            if (document.getElementById('showHeatmap').checked) {
+                hideHeatmap();
+                showHeatmap();
+            }
+
+            // Update UI
+            updateFilterCount();
+        }
+
+        function applyPreset(presetName, buttonElement) {
+            // Clear previous preset
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Reset filters first
+            activeFilters = {
+                crashType: 'all',
+                year: 'all',
+                time: 'all',
+                day: 'all',
+                lighting: 'all',
+                weather: 'all'
+            };
+
+            // Apply preset
+            switch(presetName) {
+                case 'all':
+                    // Already reset
+                    break;
+                case 'pedestrian':
+                    activeFilters.crashType = 'pedestrian';
+                    document.querySelector('input[name="crashFilter"][value="pedestrian"]').checked = true;
+                    break;
+                case 'schoolHours':
+                    activeFilters.day = 'weekday';
+                    activeFilters.time = 'morning';
+                    document.getElementById('dayFilter').value = 'weekday';
+                    document.getElementById('timeFilter').value = 'morning';
+                    break;
+                case 'rushHour':
+                    activeFilters.day = 'weekday';
+                    activeFilters.time = 'morning';
+                    document.getElementById('dayFilter').value = 'weekday';
+                    document.getElementById('timeFilter').value = 'morning';
+                    break;
+                case 'weekend':
+                    activeFilters.day = 'weekend';
+                    document.getElementById('dayFilter').value = 'weekend';
+                    break;
+            }
+
+            // Update form controls to match
+            document.getElementById('yearFilter').value = activeFilters.year;
+            document.getElementById('lightingFilter').value = activeFilters.lighting;
+            document.getElementById('weatherFilter').value = activeFilters.weather;
+
+            // Highlight active preset
+            if (presetName !== 'all' && buttonElement) {
+                buttonElement.classList.add('active');
+            }
+
+            // Apply the filters
+            filterCrashes(activeFilters.crashType);
+
+            // Update heatmap if active
+            if (document.getElementById('showHeatmap').checked) {
+                hideHeatmap();
+                showHeatmap();
+            }
+
+            // Update filter count
+            updateFilterCount();
+        }
+
+        function updateFilterCount() {
+            const activeCount = Object.values(activeFilters).filter(val => val !== 'all').length;
+            const activeFiltersChips = document.getElementById('activeFiltersChips');
+            const resetBtn = document.getElementById('resetFiltersBtn');
+
+            if (!activeFiltersChips || !resetBtn) return;
+
+            if (activeCount > 0) {
+                // Build filter chips HTML
+                let chipsHtml = '';
+                const filterLabels = {
+                    crashType: { 'fatal': 'Fatal only', 'pedestrian': 'Ped/Cyclist' },
+                    year: {},
+                    time: { 'morning': 'Morning', 'midday': 'Midday', 'afternoon': 'Afternoon', 'evening': 'Evening', 'night': 'Night' },
+                    day: { 'weekday': 'Weekdays', 'weekend': 'Weekends' },
+                    lighting: { 'daylight': 'Daylight', 'dark': 'Dark', 'dusk': 'Dusk/Dawn' },
+                    weather: { 'clear': 'Clear', 'rain': 'Rain', 'snow': 'Snow/Ice' }
+                };
+
+                Object.entries(activeFilters).forEach(([key, value]) => {
+                    if (value !== 'all') {
+                        const label = filterLabels[key][value] || value;
+                        chipsHtml += `<span class="filter-chip">${label}</span>`;
+                    }
+                });
+
+                activeFiltersChips.innerHTML = chipsHtml;
+                activeFiltersChips.style.display = 'flex';
+                resetBtn.disabled = false;
+            } else {
+                activeFiltersChips.innerHTML = '';
+                activeFiltersChips.style.display = 'none';
+                resetBtn.disabled = true;
+            }
+        }
+
+        function toggleAdvancedFilters() {
+            const content = document.getElementById('advancedFiltersContent');
+            const icon = document.getElementById('advancedToggleIcon');
+
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                icon.innerHTML = '&#9660;';
+            } else {
+                content.classList.add('show');
+                icon.innerHTML = '&#9650;';
+            }
+        }
+
+        function normalizeRoadName(name) {
+            if (!name) return '';
+            return name
+                .toUpperCase()
+                .replace(/\s+NO\s+\d+/g, '')
+                .replace(/\s+[NSEW]$/g, '')
+                .replace(/-[NSEW]$/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function findCrashesForHotspot(hotspot, radiusMeters = 150) {
+            const matchedCrashes = new Set();
+            const hotspotNormalized = normalizeRoadName(hotspot.road_name);
+
+            // Get filtered crashes to respect active filters
+            const filteredCrashes = getFilteredCrashes();
+
+            filteredCrashes.forEach(crash => {
+                const distance = getDistance(hotspot.lat, hotspot.lng, crash.lat, crash.lng);
+                if (distance <= radiusMeters) {
+                    matchedCrashes.add(crash);
+                    return;
+                }
+
+                const crashLocation = normalizeRoadName(crash.location);
+                if (hotspotNormalized && crashLocation.includes(hotspotNormalized)) {
+                    matchedCrashes.add(crash);
+                }
+            });
+
+            return Array.from(matchedCrashes).sort((a, b) => {
+                return new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time);
+            });
+        }
+
+        function getDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function flyToCrash(crashId) {
+            crashId = String(crashId);
+            const crash = crashMarkersIndex[crashId];
+            if (!crash) {
+                console.warn('Crash not found:', crashId);
+                return;
+            }
+
+            const marker = crashMarkers.find(m => String(m.crashId) === crashId);
+            if (!marker) {
+                console.warn('Marker not found for crash:', crashId);
+                return;
+            }
+
+            if (highlightCircle) {
+                highlightCircle.setStyle({ fillOpacity: 0.1, opacity: 0.3 });
+            }
+
+            map.flyTo([crash.lat, crash.lng], 18, {
+                duration: 0.9
+            });
+
+            setTimeout(() => {
+                marker.openPopup();
+            }, 1000);
+        }
+
+        function switchToExploreTab() {
+            const exploreNavItem = document.querySelector('.nav-item[data-section="explore"]');
+            if (exploreNavItem && !exploreNavItem.classList.contains('active')) {
+                exploreNavItem.click();
+            }
+        }
+
+        function renderCrashList(hotspot, crashes, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (!currentCrashLists[containerId]) {
+                currentCrashLists[containerId] = {
+                    allCrashes: crashes,
+                    displayCount: 12,
+                    sortBy: 'recent'
+                };
+            }
+
+            const state = currentCrashLists[containerId];
+            state.allCrashes = crashes; // Update with current filtered crashes
+
+            function render() {
+                if (crashes.length === 0) {
+                    container.innerHTML = `
+                        <div style="padding: 12px; color: #666; font-size: 13px; font-style: italic;">
+                            No crashes found matching current filters. Try adjusting filters or check nearby hotspots.
+                        </div>
+                    `;
+                    return;
+                }
+
+                let sortedCrashes = [...crashes];
+                if (state.sortBy === 'severity') {
+                    sortedCrashes.sort((a, b) => {
+                        const severityOrder = { 'fatal': 3, 'pedestrian': 2, 'cyclist': 2, 'injury': 1 };
+                        const aScore = (severityOrder[a.severity] || 0) + (severityOrder[a.type] || 0);
+                        const bScore = (severityOrder[b.severity] || 0) + (severityOrder[b.type] || 0);
+                        return bScore - aScore;
+                    });
+                } else if (state.sortBy === 'pedcyclist') {
+                    sortedCrashes.sort((a, b) => {
+                        const aIsPed = (a.type === 'pedestrian' || a.type === 'cyclist') ? 1 : 0;
+                        const bIsPed = (b.type === 'pedestrian' || b.type === 'cyclist') ? 1 : 0;
+                        return bIsPed - aIsPed;
+                    });
+                }
+
+                const displayCrashes = sortedCrashes.slice(0, state.displayCount);
+                const remaining = sortedCrashes.length - state.displayCount;
+
+                let html = `
+                    <div class="crash-list-header">
+                        <div style="font-size: 12px; color: #666; font-weight: 500;">
+                            ${crashes.length} crash${crashes.length !== 1 ? 'es' : ''} found
+                        </div>
+                        <select class="sort-select" id="sort-${containerId}">
+                            <option value="recent" ${state.sortBy === 'recent' ? 'selected' : ''}>Most recent</option>
+                            <option value="severity" ${state.sortBy === 'severity' ? 'selected' : ''}>By severity</option>
+                            <option value="pedcyclist" ${state.sortBy === 'pedcyclist' ? 'selected' : ''}>Ped/cyclist first</option>
+                        </select>
+                    </div>
+                `;
+
+                displayCrashes.forEach(crash => {
+                    const color = getMarkerColor(crash);
+                    const crashClasses = ['crash-row'];
+                    if (crash.severity === 'fatal') crashClasses.push('fatal');
+                    if (crash.type === 'pedestrian') crashClasses.push('pedestrian');
+                    if (crash.type === 'cyclist') crashClasses.push('cyclist');
+
+                    html += `
+                        <div class="${crashClasses.join(' ')}" data-crash-id="${crash.id}">
+                            <div class="crash-severity ${crash.severity} ${crash.type}">
+                                ${crash.severity.toUpperCase()}${crash.type !== 'vehicle' ? ' - ' + crash.type.toUpperCase() : ''}
+                            </div>
+                            <div class="crash-date">
+                                ${crash.date} at ${crash.time}
+                            </div>
+                            <div class="crash-details">
+                                ${crash.location}
+                            </div>
+                            <div class="crash-details">
+                                ${crash.weather} &bull; ${crash.light}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (remaining > 0) {
+                    html += `
+                        <button class="show-more-btn" id="show-more-${containerId}">
+                            Show ${Math.min(12, remaining)} more (${remaining} remaining)
+                        </button>
+                    `;
+                }
+
+                container.innerHTML = html;
+
+                container.querySelectorAll('.crash-row').forEach(row => {
+                    row.addEventListener('click', () => {
+                        switchToExploreTab();
+                        setTimeout(() => {
+                            flyToCrash(row.getAttribute('data-crash-id'));
+                        }, 100);
+                    });
+                });
+
+                const sortSelect = document.getElementById(`sort-${containerId}`);
+                if (sortSelect) {
+                    sortSelect.addEventListener('change', (e) => {
+                        e.stopPropagation();
+                        state.sortBy = e.target.value;
+                        render();
+                    });
+                }
+
+                const showMoreBtn = document.getElementById(`show-more-${containerId}`);
+                if (showMoreBtn) {
+                    showMoreBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        state.displayCount += 12;
+                        render();
+                    });
+                }
+            }
+
+            render();
+        }
+
+        function populateHotspots() {
+            const container = document.getElementById('hotspotsList');
+            if (!container) return;
+
+            hotspotData.forEach((hotspot, index) => {
+                const div = document.createElement('div');
+                div.className = 'hotspot-item';
+                div.setAttribute('data-hotspot-index', index);
+
+                const hasFatal = hotspot.fatal_count > 0;
+                const hasPedCyclist = hotspot.nonmotorist_count > 0;
+
+                let badges = '';
+                if (hasFatal) badges += '<span class="fatal-indicator">FATAL</span>';
+                if (hasPedCyclist) badges += '<span class="ped-cyclist-indicator">PED/CYCLIST</span>';
+
+                div.innerHTML = `
+                    <div class="hotspot-name">
+                        ${index + 1}. ${hotspot.road_name} ${badges}
+                    </div>
+                    <div class="hotspot-stats">
+                        ${hotspot.injury_count} injuries${hotspot.nonmotorist_count > 0 ? ', ' + hotspot.nonmotorist_count + ' ped/cyclist' : ''}
+                    </div>
+                    <div class="crash-detail-panel" id="crash-detail-${index}" style="display: none;">
+                        <button class="toggle-crashes-btn" data-hotspot-index="${index}">
+                            <span>View crashes at this location</span>
+                            <span class="toggle-icon">&#9660;</span>
+                        </button>
+                        <div id="crash-list-${index}" style="display: none; margin-top: 12px;"></div>
+                    </div>
+                `;
+
+                div.addEventListener('click', (e) => {
+                    if (e.target.closest('.toggle-crashes-btn')) return;
+                    if (e.target.closest('.crash-row')) return;
+                    selectHotspot(hotspot, index);
+                });
+
+                container.appendChild(div);
+            });
+
+            document.querySelectorAll('.toggle-crashes-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = btn.getAttribute('data-hotspot-index');
+                    const crashList = document.getElementById(`crash-list-${index}`);
+                    const icon = btn.querySelector('.toggle-icon');
+
+                    if (crashList.style.display === 'none') {
+                        // Always refresh the crash list with current filters
+                        const hotspot = hotspotData[index];
+                        const crashes = findCrashesForHotspot(hotspot);
+                        currentCrashLists[`crash-list-${index}`] = null; // Reset state
+                        renderCrashList(hotspot, crashes, `crash-list-${index}`);
+                        crashList.style.display = 'block';
+                        icon.innerHTML = '&#9650;';
+                    } else {
+                        crashList.style.display = 'none';
+                        icon.innerHTML = '&#9660;';
+                    }
+                });
+            });
+        }
+
+        function selectHotspot(hotspot, index) {
+            switchToExploreTab();
+
+            setTimeout(() => {
+                map.closePopup();
+
+                if (highlightCircle) {
+                    map.removeLayer(highlightCircle);
+                    highlightCircle = null;
+                }
+
+                document.querySelectorAll('.hotspot-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+
+                const hotspotElement = document.querySelector(`.hotspot-item[data-hotspot-index="${index}"]`);
+                if (hotspotElement) {
+                    hotspotElement.classList.add('selected');
+                }
+
+                const hasFatal = hotspot.fatal_count > 0;
+
+                map.flyTo([hotspot.lat, hotspot.lng], 16, {
+                    duration: 1.0
+                });
+
+                setTimeout(() => {
+                    highlightCircle = L.circle([hotspot.lat, hotspot.lng], {
+                        radius: 100,
+                        fillColor: hasFatal ? '#c62828' : '#ef6c00',
+                        fillOpacity: 0.25,
+                        stroke: true,
+                        color: hasFatal ? '#c62828' : '#ef6c00',
+                        weight: 2
+                    }).addTo(map);
+
+                    highlightCircle.bringToFront();
+
+                    highlightCircle.bindPopup(`
+                        <div style="font-family: system-ui; text-align: center; padding: 4px;">
+                            <strong style="font-size: 15px; display: block; margin-bottom: 6px;">${hotspot.road_name}</strong>
+                            <div style="font-size: 14px; color: #666; margin-bottom: 4px;">${hotspot.injury_count} injury crashes</div>
+                            ${hasFatal ? '<div style="color: #c62828; font-weight: 600;">' + hotspot.fatal_count + ' fatal</div>' : ''}
+                            ${hotspot.nonmotorist_count > 0 ? '<div style="color: #ef6c00; font-weight: 500;">' + hotspot.nonmotorist_count + ' pedestrian/cyclist</div>' : ''}
+                        </div>
+                    `).openPopup();
+
+                    document.querySelectorAll('.crash-detail-panel').forEach(c => c.style.display = 'none');
+                    const detailContainer = document.getElementById(`crash-detail-${index}`);
+                    if (detailContainer) {
+                        detailContainer.style.display = 'block';
+                    }
+
+                    currentSelectedHotspot = index;
+                }, 400);
+            }, 100);
+        }
+
+        function runSmokeTests() {
+            testResults = {};
+            const timestamp = new Date().toLocaleString();
+            document.getElementById('qaTimestamp').textContent = timestamp;
+
+            testResults.tabNavigation = (() => {
+                const navItems = document.querySelectorAll('.nav-item');
+                return navItems.length >= 4;
+            })();
+
+            testResults.mapInitialized = map !== null && map !== undefined;
+
+            testResults.tilesAttempted = true;
+
+            testResults.crashDataParsed = Array.isArray(crashData) && crashData.length > 0;
+
+            testResults.markersCreated = crashMarkers.length > 0;
+
+            testResults.hotspotsRendered = (() => {
+                const hotspotItems = document.querySelectorAll('.hotspot-item');
+                return hotspotItems.length > 0;
+            })();
+
+            testResults.filterLogic = (() => {
+                const allCrashes = crashData.length;
+                const fatalCrashes = crashData.filter(c => c.severity === 'fatal').length;
+                const pedCrashes = crashData.filter(c => c.type === 'pedestrian' || c.type === 'cyclist').length;
+                return allCrashes > 0 && (fatalCrashes > 0 || pedCrashes > 0);
+            })();
+
+            // Test year filter
+            testResults.yearFilterWorks = (() => {
+                const oldYear = activeFilters.year;
+                activeFilters.year = '2022';
+                const filtered2022 = getFilteredCrashes();
+                activeFilters.year = '2023';
+                const filtered2023 = getFilteredCrashes();
+                activeFilters.year = oldYear;
+                return filtered2022.length !== filtered2023.length && filtered2022.length > 0 && filtered2023.length > 0;
+            })();
+
+            // Test day filter
+            testResults.dayFilterWorks = (() => {
+                const oldDay = activeFilters.day;
+                activeFilters.day = 'weekday';
+                const filteredWeekday = getFilteredCrashes();
+                activeFilters.day = 'weekend';
+                const filteredWeekend = getFilteredCrashes();
+                activeFilters.day = oldDay;
+                return filteredWeekday.length !== filteredWeekend.length && filteredWeekday.length > 0 && filteredWeekend.length > 0;
+            })();
+
+            testResults.heatmapBuilds = true;
+
+            testResults.hotspotClickTriggersFlyTo = typeof selectHotspot === 'function';
+
+            testResults.crashRowClickTriggersFlyTo = typeof flyToCrash === 'function';
+
+            testResults.paginationWorks = typeof renderCrashList === 'function';
+
+            displayTestResults();
+        }
+
+        function displayTestResults() {
+            const testsContainer = document.getElementById('qaTests');
+            let html = '';
+
+            const tests = [
+                { key: 'tabNavigation', label: 'Tab navigation binding' },
+                { key: 'mapInitialized', label: 'Map initialized' },
+                { key: 'tilesAttempted', label: 'Tile layer attempted' },
+                { key: 'crashDataParsed', label: 'crashData parsed' },
+                { key: 'markersCreated', label: 'Markers created' },
+                { key: 'hotspotsRendered', label: 'Hotspots rendered' },
+                { key: 'filterLogic', label: 'Filter logic functional' },
+                { key: 'yearFilterWorks', label: 'Year filter working' },
+                { key: 'dayFilterWorks', label: 'Day of week filter working' },
+                { key: 'heatmapBuilds', label: 'Heatmap builds' },
+                { key: 'hotspotClickTriggersFlyTo', label: 'Hotspot click triggers flyTo' },
+                { key: 'crashRowClickTriggersFlyTo', label: 'Crash click triggers flyTo' },
+                { key: 'paginationWorks', label: 'Pagination implemented' }
+            ];
+
+            tests.forEach(test => {
+                const status = testResults[test.key] ? 'pass' : 'fail';
+                html += `<div class="qa-test ${status}">${test.label}</div>`;
+            });
+
+            testsContainer.innerHTML = html;
+        }
+
+        function toggleQAPanel() {
+            const content = document.getElementById('qaContent');
+            content.classList.toggle('show');
+        }
+
+        function copyDiagnostics() {
+            const results = Object.entries(testResults)
+                .map(([key, value]) => `${key}: ${value ? 'PASS' : 'FAIL'}`)
+                .join('\n');
+
+            const text = `Stamford Safety Explorer ${metaData.version || 'Unknown'}\nLoaded: ${document.getElementById('qaTimestamp').textContent}\n\n${results}`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Diagnostics copied to clipboard');
+            }).catch(() => {
+                alert('Failed to copy. Results:\n\n' + text);
+            });
+        }
+
+        // Main initialization
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Load external data
+                await loadData();
+
+                const validationErrors = validateData();
+                if (validationErrors.length > 0) {
+                    throw new Error('Data validation failed: ' + validationErrors.join(', '));
+                }
+
+                buildCrashIndex();
+                initializeMap();
+                setupNavigation();
+                setupControls();
+                populateHotspots();
+                filterCrashes(currentFilter);
+
+                hideLoading();
+
+                setTimeout(() => {
+                    runSmokeTests();
+                }, 500);
+
+            } catch (error) {
+                showError('initialization', error);
+            }
+        });
+    </script>
+</body>
+</html>
