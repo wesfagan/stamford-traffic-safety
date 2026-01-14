@@ -16,7 +16,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f7f6f2;
             color: #2a2a2a;
-            line-height: 1.65;
+            line-height: 1.6;
         }
 
         .header {
@@ -42,7 +42,7 @@
             font-size: 15px;
             opacity: 0.85;
             font-weight: 400;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         .data-version {
@@ -109,29 +109,63 @@
             height: 100%;
         }
 
+        /* LEFT SIDEBAR - FILTER CONTROLS */
         .map-controls {
             position: absolute;
             top: 20px;
             left: 20px;
             background: #fefefe;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 0;
             box-shadow: 0 2px 16px rgba(0,0,0,0.1);
             z-index: 1000;
-            min-width: 280px;
-            max-width: 320px;
+            min-width: 300px;
+            max-width: 340px;
             border: 1px solid #e8e6e0;
+            max-height: calc(100vh - 220px);
+            overflow-y: auto;
         }
 
-        .map-controls h3 {
-            font-size: 15px;
+        .controls-header {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #e8e6e0;
+            background: #fafaf8;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .controls-header h3 {
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 16px;
             color: #2d2d2d;
+            margin-bottom: 6px;
+        }
+
+        .controls-header p {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .controls-body {
+            padding: 16px 20px 20px;
+        }
+
+        .filter-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            margin-top: 20px;
+        }
+
+        .filter-section-title:first-child {
+            margin-top: 0;
         }
 
         .control-group {
-            margin-bottom: 16px;
+            margin-bottom: 4px;
         }
 
         .control-group label {
@@ -140,8 +174,14 @@
             gap: 10px;
             font-size: 14px;
             cursor: pointer;
-            padding: 8px 0;
+            padding: 10px 12px;
             color: #444;
+            border-radius: 6px;
+            transition: background 0.15s ease;
+        }
+
+        .control-group label:hover {
+            background: #f5f4f0;
         }
 
         .control-group input[type="checkbox"],
@@ -152,128 +192,52 @@
             accent-color: #4a4a4a;
         }
 
-        .info-note {
-            font-size: 12px;
-            color: #666;
-            line-height: 1.6;
-            padding: 14px;
-            background: #f5f4f0;
-            border-radius: 6px;
-            margin-bottom: 18px;
-            border: 1px solid #e8e6e0;
-        }
-
-        .filter-section {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e8e6e0;
-        }
-
-        .filter-section:last-of-type {
-            border-bottom: none;
-            margin-bottom: 12px;
-        }
-
-        .filter-section h4 {
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .advanced-filters {
-            border: 1px solid #e0ddd5;
-            border-radius: 8px;
-            margin-top: 14px;
-            overflow: hidden;
-        }
-
-        .advanced-filters-toggle {
-            width: 100%;
-            padding: 14px 16px;
-            background: #f5f4f0;
-            border: none;
-            font-size: 13px;
-            font-weight: 500;
-            color: #555;
-            cursor: pointer;
-            text-align: left;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .advanced-filters-toggle:hover {
-            background: #eceae4;
-        }
-
-        .advanced-filters-content {
-            padding: 18px;
-            display: none;
-            background: #fefefe;
-        }
-
-        .advanced-filters-content.show {
-            display: block;
-        }
-
+        /* Active Filters Chips */
         .active-filters-chips {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 14px;
+            gap: 6px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e8e6e0;
         }
 
         .filter-chip {
-            padding: 5px 12px;
+            padding: 4px 10px;
             background: #e8f4e8;
             color: #2e7d32;
             font-size: 11px;
             font-weight: 500;
-            border-radius: 14px;
+            border-radius: 12px;
             border: 1px solid #c8e6c9;
         }
 
-        .filter-presets {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 14px;
-        }
-
-        .preset-btn {
-            padding: 7px 14px;
-            border: 1px solid #d5d2ca;
-            border-radius: 6px;
-            background: #fefefe;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .preset-btn:hover {
-            background: #f5f4f0;
-            border-color: #999;
-        }
-
-        .preset-btn.active {
-            background: #4a4a4a;
-            color: white;
-            border-color: #4a4a4a;
+        /* Filter Grid */
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
         .filter-group {
-            margin-bottom: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group.full-width {
+            grid-column: 1 / -1;
         }
 
         .filter-group label {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
-            color: #444;
-            margin-bottom: 8px;
-            display: block;
+            color: #555;
+            margin-bottom: 6px;
+            padding: 0;
+        }
+
+        .filter-group label:hover {
+            background: transparent;
         }
 
         .filter-group select {
@@ -284,30 +248,16 @@
             font-size: 13px;
             background: #fefefe;
             cursor: pointer;
+            transition: border-color 0.15s ease;
+        }
+
+        .filter-group select:hover {
+            border-color: #999;
         }
 
         .filter-group select:focus {
             outline: none;
             border-color: #4a4a4a;
-        }
-
-        .active-filters {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 14px;
-            background: #f5f4f0;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-bottom: 14px;
-        }
-
-        .filter-count {
-            background: #4a4a4a;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-weight: 600;
         }
 
         .reset-filters-btn {
@@ -321,6 +271,7 @@
             font-size: 13px;
             font-weight: 500;
             transition: all 0.2s ease;
+            margin-top: 20px;
         }
 
         .reset-filters-btn:hover {
@@ -340,60 +291,115 @@
             color: #999;
         }
 
-        .map-controls {
-            max-height: calc(100vh - 220px);
-            overflow-y: auto;
-        }
-
+        /* RIGHT SIDEBAR - HOTSPOTS */
         .map-sidebar {
             position: absolute;
             top: 20px;
             right: 20px;
-            width: 340px;
+            width: 360px;
             max-height: calc(100% - 40px);
             background: #fefefe;
-            border-radius: 10px;
-            padding: 0;
+            border-radius: 12px;
             box-shadow: 0 2px 16px rgba(0,0,0,0.1);
-            overflow-y: auto;
+            overflow: hidden;
             z-index: 1000;
             border: 1px solid #e8e6e0;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar-header {
-            padding: 22px;
+            padding: 18px 20px;
             border-bottom: 1px solid #e8e6e0;
-            position: sticky;
-            top: 0;
-            background: #fefefe;
-            z-index: 10;
+            background: #fafaf8;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .sidebar-header:hover {
+            background: #f0efe8;
+        }
+
+        .sidebar-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .sidebar-header h3 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 8px;
             color: #2d2d2d;
         }
 
+        .sidebar-toggle-icon {
+            font-size: 12px;
+            color: #888;
+            transition: transform 0.2s ease;
+        }
+
+        .sidebar-header.collapsed .sidebar-toggle-icon {
+            transform: rotate(180deg);
+        }
+
         .sidebar-header p {
-            font-size: 13px;
+            font-size: 12px;
             color: #666;
-            line-height: 1.55;
+            line-height: 1.5;
+            margin-top: 6px;
+        }
+
+        .sidebar-sort {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e8e6e0;
+            background: #fefefe;
+        }
+
+        .sidebar-sort label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .sidebar-sort select {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #d5d2ca;
+            border-radius: 5px;
+            font-size: 12px;
+            background: #fefefe;
+            cursor: pointer;
         }
 
         .hotspots-list {
-            padding: 14px;
+            padding: 12px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .hotspots-list.collapsed {
+            display: none;
+        }
+
+        .sidebar-sort.collapsed {
+            display: none;
         }
 
         .hotspot-item {
-            padding: 16px;
+            padding: 14px 16px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             cursor: pointer;
             border: 1px solid #e8e6e0;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
             background: #fefefe;
+        }
+
+        .hotspot-item:last-child {
+            margin-bottom: 0;
         }
 
         .hotspot-item:hover {
@@ -406,27 +412,35 @@
             background: #f5f4f0;
         }
 
+        .hotspot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
         .hotspot-name {
             font-weight: 500;
             color: #2d2d2d;
-            margin-bottom: 8px;
             font-size: 14px;
+            line-height: 1.4;
+            flex: 1;
         }
 
-        .hotspot-stats {
-            font-size: 13px;
-            color: #666;
+        .hotspot-badges {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
         }
 
         .fatal-indicator {
             display: inline-block;
             background: #c62828;
             color: white;
-            padding: 3px 9px;
+            padding: 3px 8px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 600;
-            margin-left: 8px;
             letter-spacing: 0.3px;
         }
 
@@ -434,17 +448,22 @@
             display: inline-block;
             background: #ef6c00;
             color: white;
-            padding: 3px 9px;
+            padding: 3px 8px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 600;
-            margin-left: 4px;
             letter-spacing: 0.3px;
         }
 
+        .hotspot-stats {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+        }
+
         .crash-detail-panel {
-            margin-top: 14px;
-            padding-top: 14px;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 1px solid #e8e6e0;
         }
 
@@ -452,12 +471,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .sort-select {
-            font-size: 12px;
-            padding: 5px 10px;
+            font-size: 11px;
+            padding: 4px 8px;
             border: 1px solid #d5d2ca;
             border-radius: 4px;
             background: #fefefe;
@@ -466,18 +485,18 @@
 
         .toggle-crashes-btn {
             width: 100%;
-            padding: 12px 16px;
+            padding: 10px 14px;
             background: #f5f4f0;
             border: 1px solid #d5d2ca;
             border-radius: 6px;
             color: #444;
             font-weight: 500;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
         }
 
         .toggle-crashes-btn:hover {
@@ -486,14 +505,14 @@
         }
 
         .crash-row {
-            padding: 14px;
-            margin-bottom: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
             border-left: 3px solid #d5d2ca;
             background: #fafaf8;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
+            font-size: 12px;
+            transition: all 0.15s ease;
         }
 
         .crash-row:hover {
@@ -512,8 +531,8 @@
 
         .crash-severity {
             font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 13px;
+            margin-bottom: 4px;
+            font-size: 12px;
         }
 
         .crash-severity.fatal {
@@ -527,26 +546,26 @@
 
         .crash-date {
             color: #444;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .crash-details {
             color: #666;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .show-more-btn {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #fefefe;
             border: 1px solid #d5d2ca;
             border-radius: 6px;
             color: #444;
             font-weight: 500;
             cursor: pointer;
-            font-size: 13px;
-            margin-top: 10px;
-            transition: all 0.2s;
+            font-size: 12px;
+            margin-top: 8px;
+            transition: all 0.15s ease;
         }
 
         .show-more-btn:hover:not(:disabled) {
@@ -559,31 +578,39 @@
             cursor: not-allowed;
         }
 
+        /* CONTENT SECTIONS */
         .content-section {
-            max-width: 760px;
+            max-width: 720px;
             margin: 0 auto;
-            padding: 72px 32px;
+            padding: 56px 32px;
         }
 
         .content-section h2 {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: 600;
-            margin-bottom: 18px;
+            margin-bottom: 8px;
             color: #2d2d2d;
             letter-spacing: -0.5px;
         }
 
         .content-section .subtitle {
-            font-size: 18px;
+            font-size: 16px;
             color: #666;
-            margin-bottom: 56px;
-            line-height: 1.65;
+            margin-bottom: 32px;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .content-section .divider {
+            border: none;
+            border-top: 1px solid #e0ddd5;
+            margin: 40px 0;
         }
 
         .content-section h3 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
-            margin: 72px 0 28px;
+            margin: 40px 0 16px;
             color: #2d2d2d;
             letter-spacing: -0.3px;
         }
@@ -593,41 +620,41 @@
         }
 
         .content-section h4 {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
-            margin: 40px 0 18px;
+            margin: 28px 0 12px;
             color: #3a3a3a;
         }
 
         .content-section p {
-            margin-bottom: 24px;
+            margin-bottom: 16px;
             color: #444;
-            font-size: 16px;
-            line-height: 1.7;
+            font-size: 15px;
+            line-height: 1.65;
         }
 
         .content-section ul,
         .content-section ol {
-            margin: 24px 0 24px 28px;
+            margin: 16px 0 16px 24px;
         }
 
         .content-section li {
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             color: #444;
-            font-size: 16px;
-            line-height: 1.65;
+            font-size: 15px;
+            line-height: 1.6;
         }
 
         .content-section table {
             width: 100%;
             border-collapse: collapse;
-            margin: 40px 0;
-            font-size: 15px;
+            margin: 28px 0;
+            font-size: 14px;
         }
 
         .content-section th {
             background: #f5f4f0;
-            padding: 16px 18px;
+            padding: 14px 16px;
             text-align: left;
             font-weight: 600;
             border-bottom: 2px solid #d5d2ca;
@@ -635,7 +662,7 @@
         }
 
         .content-section td {
-            padding: 16px 18px;
+            padding: 14px 16px;
             border-bottom: 1px solid #e8e6e0;
         }
 
@@ -644,16 +671,16 @@
         }
 
         .highlight-box {
-            padding: 28px;
+            padding: 24px;
             border-left: 4px solid #4a4a4a;
             background: #fafaf8;
             border-radius: 0 8px 8px 0;
-            margin: 40px 0;
+            margin: 24px 0;
         }
 
         .highlight-box p {
-            margin-bottom: 14px;
-            line-height: 1.6;
+            margin-bottom: 10px;
+            line-height: 1.5;
         }
 
         .highlight-box p:last-child {
@@ -661,40 +688,35 @@
         }
 
         .location-highlight {
-            padding: 28px;
+            padding: 24px;
             border: 1px solid #e0ddd5;
             border-radius: 8px;
-            margin: 28px 0;
+            margin: 20px 0;
             background: #fefefe;
         }
 
         .location-highlight h4 {
             margin-top: 0;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .location-meta {
-            font-size: 14px;
+            font-size: 13px;
             color: #888;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             font-weight: 500;
         }
 
-        .divider {
-            border: none;
-            border-top: 1px solid #e0ddd5;
-            margin: 72px 0;
-        }
-
         .footnote {
-            font-size: 14px;
+            font-size: 13px;
             color: #888;
-            line-height: 1.7;
-            margin-top: 56px;
-            padding-top: 28px;
+            line-height: 1.6;
+            margin-top: 40px;
+            padding-top: 24px;
             border-top: 1px solid #e8e6e0;
         }
 
+        /* LOADING & ERROR */
         .loading {
             position: fixed;
             top: 50%;
@@ -756,6 +778,7 @@
             margin-top: 14px;
         }
 
+        /* QA PANEL */
         .qa-panel {
             position: fixed;
             bottom: 20px;
@@ -890,6 +913,7 @@
             background: #f5f4f0;
         }
 
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 22px;
@@ -919,16 +943,20 @@
             }
 
             .content-section {
-                padding: 56px 20px;
+                padding: 40px 20px;
             }
 
             .content-section h2 {
-                font-size: 26px;
+                font-size: 24px;
             }
 
             .content-section h3 {
-                font-size: 20px;
-                margin: 56px 0 24px;
+                font-size: 19px;
+                margin: 32px 0 14px;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
             }
 
             .qa-panel {
@@ -967,18 +995,19 @@
     </div>
 
     <div class="section active" id="explore-section">
+        <!-- LEFT SIDEBAR - FILTERS -->
         <div class="map-controls">
-            <h3>Filter Crashes</h3>
-
-            <div class="info-note">
-                Showing injury and fatal crashes from the last five years. Property-damage-only crashes are excluded to focus on harm prevention.
+            <div class="controls-header">
+                <h3>Filter Crashes</h3>
+                <p>Showing injury and fatal crashes from the last five years. Property-damage-only crashes are excluded.</p>
             </div>
 
-            <!-- Active Filters Chips -->
-            <div class="active-filters-chips" id="activeFiltersChips" style="display: none;"></div>
+            <div class="controls-body">
+                <!-- Active Filters Chips -->
+                <div class="active-filters-chips" id="activeFiltersChips" style="display: none;"></div>
 
-            <!-- Primary Story Filters -->
-            <div class="filter-section">
+                <!-- Crash Type Radio Buttons -->
+                <div class="filter-section-title">Crash Type</div>
                 <div class="control-group">
                     <label>
                         <input type="radio" name="crashFilter" value="all" checked>
@@ -993,19 +1022,14 @@
                         Fatal crashes only
                     </label>
                 </div>
-            </div>
 
-            <!-- Advanced Filters (Collapsible) -->
-            <div class="advanced-filters">
-                <button class="advanced-filters-toggle" onclick="toggleAdvancedFilters()">
-                    <span>Advanced Filters</span>
-                    <span id="advancedToggleIcon">&#9660;</span>
-                </button>
-                <div class="advanced-filters-content" id="advancedFiltersContent">
+                <!-- Filter Dropdowns in Grid -->
+                <div class="filter-section-title">Refine Results</div>
+                <div class="filter-grid">
                     <div class="filter-group">
                         <label>Year</label>
                         <select id="yearFilter" onchange="applyFilters()">
-                            <option value="all">All Years (2021-2025)</option>
+                            <option value="all">All Years</option>
                             <option value="2025">2025</option>
                             <option value="2024">2024</option>
                             <option value="2023">2023</option>
@@ -1015,23 +1039,23 @@
                     </div>
 
                     <div class="filter-group">
-                        <label>Time of Day</label>
-                        <select id="timeFilter" onchange="applyFilters()">
-                            <option value="all">All Times</option>
-                            <option value="morning">Morning (6am-9am)</option>
-                            <option value="midday">Midday (9am-3pm)</option>
-                            <option value="afternoon">Afternoon (3pm-6pm)</option>
-                            <option value="evening">Evening (6pm-9pm)</option>
-                            <option value="night">Night (9pm-6am)</option>
+                        <label>Day of Week</label>
+                        <select id="dayFilter" onchange="applyFilters()">
+                            <option value="all">All Days</option>
+                            <option value="weekday">Weekdays</option>
+                            <option value="weekend">Weekends</option>
                         </select>
                     </div>
 
                     <div class="filter-group">
-                        <label>Day of Week</label>
-                        <select id="dayFilter" onchange="applyFilters()">
-                            <option value="all">All Days</option>
-                            <option value="weekday">Weekdays (Mon-Fri)</option>
-                            <option value="weekend">Weekends (Sat-Sun)</option>
+                        <label>Time of Day</label>
+                        <select id="timeFilter" onchange="applyFilters()">
+                            <option value="all">All Times</option>
+                            <option value="morning">Morning (6-9am)</option>
+                            <option value="midday">Midday (9am-3pm)</option>
+                            <option value="afternoon">Afternoon (3-6pm)</option>
+                            <option value="evening">Evening (6-9pm)</option>
+                            <option value="night">Night (9pm-6am)</option>
                         </select>
                     </div>
 
@@ -1045,7 +1069,7 @@
                         </select>
                     </div>
 
-                    <div class="filter-group">
+                    <div class="filter-group full-width">
                         <label>Weather</label>
                         <select id="weatherFilter" onchange="applyFilters()">
                             <option value="all">All Weather</option>
@@ -1055,29 +1079,40 @@
                         </select>
                     </div>
                 </div>
-            </div>
 
-            <!-- Heatmap Toggle -->
-            <div class="filter-section">
-                <h4>Display</h4>
+                <!-- Display Toggle -->
+                <div class="filter-section-title">Display</div>
                 <div class="control-group">
                     <label>
                         <input type="checkbox" id="showHeatmap">
                         Show density overlay
                     </label>
                 </div>
-            </div>
 
-            <!-- Reset Button -->
-            <button class="reset-filters-btn" id="resetFiltersBtn" onclick="resetFilters()" disabled>
-                Reset All Filters
-            </button>
+                <!-- Reset Button -->
+                <button class="reset-filters-btn" id="resetFiltersBtn" onclick="resetFilters()" disabled>
+                    Reset All Filters
+                </button>
+            </div>
         </div>
 
+        <!-- RIGHT SIDEBAR - HOTSPOTS -->
         <div class="map-sidebar">
-            <div class="sidebar-header">
-                <h3>High-Risk Locations</h3>
-                <p>Locations with the most injury and fatal crashes. Click to explore individual incidents.</p>
+            <div class="sidebar-header" id="sidebarHeader" onclick="toggleHotspotsList()">
+                <div class="sidebar-header-top">
+                    <h3>High-Risk Locations</h3>
+                    <span class="sidebar-toggle-icon" id="sidebarToggleIcon">&#9650;</span>
+                </div>
+                <p>Locations with the most injury and fatal crashes. Click to explore.</p>
+            </div>
+            <div class="sidebar-sort" id="sidebarSort">
+                <label>Sort by:</label>
+                <select id="hotspotSortSelect" onchange="sortHotspots()">
+                    <option value="score">Risk Score</option>
+                    <option value="crashes">Most Crashes</option>
+                    <option value="fatal">Most Fatalities</option>
+                    <option value="ped">Most Ped/Cyclist</option>
+                </select>
             </div>
             <div class="hotspots-list" id="hotspotsList"></div>
         </div>
@@ -1094,7 +1129,6 @@
 
             <h3>The Pedestrian and Cyclist Problem</h3>
             <p>Over the last five years, 310 crashes involved people walking or cycling. These crashes represent 13% of all injury and fatal crashes, but 39% of fatalities. Put another way: if you're not in a car, you're far more likely to die when something goes wrong.</p>
-
             <p>Nine people walking or cycling were killed. Twenty-three people total died in crashes during this period. The math is clear and brutal.</p>
 
             <div class="highlight-box">
@@ -1135,19 +1169,16 @@
 
             <h3>When Crashes Happen</h3>
             <p>Serious crashes concentrate during predictable times:</p>
-
             <ul>
                 <li><strong>5:00 PM:</strong> Evening rush. High traffic, driver fatigue, fading light.</li>
                 <li><strong>8:00 AM:</strong> Morning commute. Speed, impatience, school traffic.</li>
                 <li><strong>3:00 PM:</strong> School dismissal. Children crossing streets, distracted drivers.</li>
                 <li><strong>Dark conditions:</strong> Insufficient lighting at key crossings amplifies every other risk.</li>
             </ul>
-
             <p>These patterns suggest where targeted enforcement, signal timing adjustments, and lighting improvements could reduce harm.</p>
 
             <h3>What This Implies About Street Design</h3>
             <p>These crashes are not accidents. They are predictable outcomes of design decisions. Wide lanes encourage speed. Missing crosswalks force risky behavior. Poor lighting makes pedestrians invisible.</p>
-
             <p>The data shows us where the problems are. What remains is deciding whether to act.</p>
 
             <div class="divider"></div>
@@ -1193,7 +1224,6 @@
 
             <h3>Data Source</h3>
             <p>All crash data comes from the Connecticut Crash Data Repository, maintained by the UConn Transportation Safety Research Center. This includes 2,369 injury and fatal crashes in Stamford over the last five years.</p>
-
             <p>Every crash is police-reported, geocoded with latitude and longitude coordinates, and validated by Connecticut DOT. This is not a sample. This is the complete official record.</p>
 
             <h3>What Gets Included</h3>
@@ -1203,7 +1233,6 @@
                 <li>Injury crashes requiring medical attention (2,346 total)</li>
                 <li>Any crash involving a pedestrian or cyclist, regardless of injury severity</li>
             </ul>
-
             <p>Property-damage-only crashes are excluded. This is intentional. Most property-damage crashes are minor parking lot incidents that don't indicate dangerous street design. Including them would obscure the locations where people are actually at risk.</p>
 
             <h3>How Hotspots Are Identified</h3>
@@ -1213,7 +1242,6 @@
                 <li>Injury crash: 5 points</li>
                 <li>Pedestrian or cyclist involvement: additional weight</li>
             </ul>
-
             <p>This scoring prioritizes locations where the most severe outcomes occur, not just where the most crashes happen.</p>
 
             <h3>Matching Crashes to Locations</h3>
@@ -1222,16 +1250,12 @@
                 <li><strong>Geographic proximity:</strong> Crashes within 150 meters of the hotspot center</li>
                 <li><strong>Road name matching:</strong> Crashes whose location string contains the hotspot road name</li>
             </ul>
-
             <p>This dual approach accounts for imprecise geocoding and ensures you see the full picture at each location.</p>
 
             <h3>Important Limitations</h3>
             <p><strong>No exposure normalization:</strong> This analysis shows raw crash counts, not crash rates per mile traveled. A road with high traffic will naturally show more crashes than a quiet residential street, even if the quiet street is more dangerous per trip. Rate-based analysis would require traffic volume data, which is not included here.</p>
-
             <p><strong>Incomplete environmental data:</strong> Some crashes lack complete details about weather, lighting, or road conditions. These gaps are noted in the data.</p>
-
             <p><strong>Reporting lag:</strong> Fatal crash reports can take months to finalize during investigation. The most recent crashes may not yet be fully documented.</p>
-
             <p><strong>Not an engineering study:</strong> This analysis identifies priorities and patterns. It is not a substitute for detailed engineering evaluation before implementing infrastructure changes.</p>
 
             <h3>Technical Implementation</h3>
@@ -1252,28 +1276,21 @@
 
             <h3>Purpose</h3>
             <p>This tool makes Stamford's crash data accessible to anyone who cares about street safety. It's designed for residents, advocates, planners, and journalists who want to understand where people are getting hurt and what patterns emerge.</p>
-
             <p>By focusing on injury and fatal crashes, and particularly on pedestrian and cyclist safety, it highlights the infrastructure decisions that have the biggest impact on whether people live or die on local streets.</p>
 
             <h3>What You Can Do With This</h3>
             <p><strong>Check your neighborhood:</strong> See if dangerous intersections are near your home, your kid's school, or your commute route.</p>
-
             <p><strong>Advocate for change:</strong> Bring specific crash data to city meetings, community boards, or local representatives. Data changes conversations.</p>
-
             <p><strong>Understand patterns:</strong> See how crashes cluster by time, location, and type. Understand what's predictable and what's preventable.</p>
-
             <p><strong>Hold leaders accountable:</strong> Stamford committed to Vision Zero in 2022 with a goal of zero traffic deaths by 2032. This tool shows whether we're on track.</p>
 
             <h3>Vision Zero Context</h3>
             <p>Vision Zero is a commitment to eliminate all traffic fatalities and serious injuries. It starts from the premise that no loss of life is acceptable, and that street design should prioritize human safety over vehicle speed.</p>
-
             <p>Stamford adopted Vision Zero in 2022. The current pace suggests we are not on track to meet the 2032 goal. Acceleration requires both political will and sustained investment in proven safety interventions.</p>
 
             <h3>Sharing This Tool</h3>
             <p>Share this tool by linking to the official site. The data is updated periodically as new crash reports become available.</p>
-
             <p><strong>Official link:</strong> <a href="https://wesfagan.github.io/stamford-traffic-safety/" style="color: #2e7d32;">wesfagan.github.io/stamford-traffic-safety</a></p>
-
             <p>If it helps improve safety in Stamford, share it widely.</p>
 
             <div class="divider"></div>
@@ -1311,6 +1328,7 @@
         let crashData = [];
         let hotspotData = [];
         let metaData = {};
+        let sortedHotspotData = [];
 
         let map;
         let crashMarkers = [];
@@ -1330,28 +1348,26 @@
         let currentCrashLists = {};
         let testResults = {};
         let tilesLoaded = false;
+        let hotspotsExpanded = true;
 
         // Data loading with cache-busting
         async function loadData() {
             try {
-                // Load meta first to get cache key
                 const metaResponse = await fetch('data/meta.json');
                 if (!metaResponse.ok) throw new Error('Failed to load meta.json');
                 metaData = await metaResponse.json();
 
                 const cacheKey = metaData.cacheKey || Date.now();
 
-                // Load crash data with cache-busting
                 const crashResponse = await fetch(`data/crashes.json?v=${cacheKey}`);
                 if (!crashResponse.ok) throw new Error('Failed to load crashes.json');
                 crashData = await crashResponse.json();
 
-                // Load hotspot data with cache-busting
                 const hotspotResponse = await fetch(`data/hotspots.json?v=${cacheKey}`);
                 if (!hotspotResponse.ok) throw new Error('Failed to load hotspots.json');
                 hotspotData = await hotspotResponse.json();
+                sortedHotspotData = [...hotspotData];
 
-                // Update version display
                 const versionEl = document.getElementById('dataVersion');
                 if (versionEl) {
                     versionEl.textContent = `Data version ${metaData.version} | Last updated: ${metaData.lastUpdated}`;
@@ -1391,33 +1407,12 @@
 
         function validateData() {
             const errors = [];
-
             if (!Array.isArray(crashData)) {
                 errors.push('crashData is not an array');
-            } else {
-                let validCount = 0;
-                let invalidCount = 0;
-                crashData.forEach((crash, idx) => {
-                    if (typeof crash.lat !== 'number' || typeof crash.lng !== 'number') {
-                        invalidCount++;
-                        return;
-                    }
-                    if (crash.lat < 41.0 || crash.lat > 41.2 || crash.lng < -73.6 || crash.lng > -73.5) {
-                        invalidCount++;
-                        return;
-                    }
-                    validCount++;
-                });
-
-                if (invalidCount > 0) {
-                    console.warn(`${invalidCount} crashes had invalid coordinates and were skipped`);
-                }
             }
-
             if (!Array.isArray(hotspotData)) {
                 errors.push('hotspotData is not an array');
             }
-
             return errors;
         }
 
@@ -1437,14 +1432,7 @@
                 maxZoom: 19
             });
 
-            tileLayer.on('load', () => {
-                tilesLoaded = true;
-            });
-
-            tileLayer.on('tileerror', () => {
-                console.warn('Base tiles failed to load. Data layer is still available.');
-            });
-
+            tileLayer.on('load', () => { tilesLoaded = true; });
             tileLayer.addTo(map);
         }
 
@@ -1457,12 +1445,9 @@
                 if (!navItem) return;
 
                 const sectionId = navItem.getAttribute('data-section') + '-section';
-                const navItems = document.querySelectorAll('.nav-item');
-                const sections = document.querySelectorAll('.section');
-
-                navItems.forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 navItem.classList.add('active');
-                sections.forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
 
                 const targetSection = document.getElementById(sectionId);
                 if (targetSection) {
@@ -1499,29 +1484,22 @@
                 });
             });
 
-            // Initialize filter count display
             updateFilterCount();
         }
 
-        // FIXED: Parse YYYY-MM-DD date format correctly
+        // Filter matching functions
         function matchesYearFilter(crash) {
             if (activeFilters.year === 'all') return true;
             if (!crash.date) return false;
-
-            // Data format is YYYY-MM-DD
             const year = crash.date.substring(0, 4);
             return year === activeFilters.year;
         }
 
-        // FIXED: Parse HH:MM:SS 24-hour time format correctly
         function matchesTimeFilter(crash) {
             if (activeFilters.time === 'all') return true;
             if (!crash.time) return false;
-
-            // Data format is HH:MM:SS (24-hour)
             const timeParts = crash.time.split(':');
             if (timeParts.length < 2) return false;
-
             const hour = parseInt(timeParts[0], 10);
             if (isNaN(hour)) return false;
 
@@ -1535,36 +1513,22 @@
             }
         }
 
-        // FIXED: Parse YYYY-MM-DD date format for day of week calculation
         function matchesDayFilter(crash) {
             if (activeFilters.day === 'all') return true;
             if (!crash.date) return false;
-
-            // Data format is YYYY-MM-DD
             const dateParts = crash.date.split('-');
             if (dateParts.length !== 3) return false;
-
             const year = parseInt(dateParts[0], 10);
-            const month = parseInt(dateParts[1], 10) - 1; // JavaScript months are 0-indexed
+            const month = parseInt(dateParts[1], 10) - 1;
             const day = parseInt(dateParts[2], 10);
-
             if (isNaN(year) || isNaN(month) || isNaN(day)) return false;
-
             const date = new Date(year, month, day);
             if (isNaN(date.getTime())) return false;
-
-            const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+            const dayOfWeek = date.getDay();
 
             switch(activeFilters.day) {
                 case 'weekday': return dayOfWeek >= 1 && dayOfWeek <= 5;
                 case 'weekend': return dayOfWeek === 0 || dayOfWeek === 6;
-                case 'monday': return dayOfWeek === 1;
-                case 'tuesday': return dayOfWeek === 2;
-                case 'wednesday': return dayOfWeek === 3;
-                case 'thursday': return dayOfWeek === 4;
-                case 'friday': return dayOfWeek === 5;
-                case 'saturday': return dayOfWeek === 6;
-                case 'sunday': return dayOfWeek === 0;
                 default: return true;
             }
         }
@@ -1572,7 +1536,6 @@
         function matchesLightingFilter(crash) {
             if (activeFilters.lighting === 'all') return true;
             if (!crash.light) return false;
-
             const light = crash.light.toLowerCase();
             switch(activeFilters.lighting) {
                 case 'daylight': return light.includes('daylight') || light.includes('day');
@@ -1585,7 +1548,6 @@
         function matchesWeatherFilter(crash) {
             if (activeFilters.weather === 'all') return true;
             if (!crash.weather) return false;
-
             const weather = crash.weather.toLowerCase();
             switch(activeFilters.weather) {
                 case 'clear': return weather.includes('clear') || weather.includes('cloudy');
@@ -1598,7 +1560,6 @@
         function getFilteredCrashes() {
             let filtered = crashData;
 
-            // Apply crash type filter
             if (activeFilters.crashType === 'fatal') {
                 filtered = filtered.filter(crash => crash.severity === 'fatal');
             } else if (activeFilters.crashType === 'pedestrian') {
@@ -1607,7 +1568,6 @@
                 );
             }
 
-            // Apply all other filters
             filtered = filtered.filter(crash =>
                 matchesYearFilter(crash) &&
                 matchesTimeFilter(crash) &&
@@ -1664,10 +1624,7 @@
         }
 
         function showHeatmap() {
-            if (heatmapLayer) {
-                map.removeLayer(heatmapLayer);
-            }
-
+            if (heatmapLayer) map.removeLayer(heatmapLayer);
             heatmapLayer = L.layerGroup();
             const filteredCrashes = getFilteredCrashes();
 
@@ -1686,34 +1643,27 @@
         }
 
         function hideHeatmap() {
-            if (heatmapLayer) {
-                map.removeLayer(heatmapLayer);
-            }
+            if (heatmapLayer) map.removeLayer(heatmapLayer);
         }
 
         function applyFilters() {
-            // Update filter state from form controls
             activeFilters.year = document.getElementById('yearFilter').value;
             activeFilters.time = document.getElementById('timeFilter').value;
             activeFilters.day = document.getElementById('dayFilter').value;
             activeFilters.lighting = document.getElementById('lightingFilter').value;
             activeFilters.weather = document.getElementById('weatherFilter').value;
 
-            // Reapply crash filter
             filterCrashes(activeFilters.crashType);
 
-            // Update heatmap if active
             if (document.getElementById('showHeatmap').checked) {
                 hideHeatmap();
                 showHeatmap();
             }
 
-            // Update filter count display
             updateFilterCount();
         }
 
         function resetFilters() {
-            // Reset all filters to default
             activeFilters = {
                 crashType: 'all',
                 year: 'all',
@@ -1723,7 +1673,6 @@
                 weather: 'all'
             };
 
-            // Reset form controls
             document.querySelector('input[name="crashFilter"][value="all"]').checked = true;
             document.getElementById('yearFilter').value = 'all';
             document.getElementById('timeFilter').value = 'all';
@@ -1731,83 +1680,13 @@
             document.getElementById('lightingFilter').value = 'all';
             document.getElementById('weatherFilter').value = 'all';
 
-            // Clear any active preset
-            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-
-            // Reapply filters
             filterCrashes('all');
 
-            // Update heatmap if active
             if (document.getElementById('showHeatmap').checked) {
                 hideHeatmap();
                 showHeatmap();
             }
 
-            // Update UI
-            updateFilterCount();
-        }
-
-        function applyPreset(presetName, buttonElement) {
-            // Clear previous preset
-            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-
-            // Reset filters first
-            activeFilters = {
-                crashType: 'all',
-                year: 'all',
-                time: 'all',
-                day: 'all',
-                lighting: 'all',
-                weather: 'all'
-            };
-
-            // Apply preset
-            switch(presetName) {
-                case 'all':
-                    // Already reset
-                    break;
-                case 'pedestrian':
-                    activeFilters.crashType = 'pedestrian';
-                    document.querySelector('input[name="crashFilter"][value="pedestrian"]').checked = true;
-                    break;
-                case 'schoolHours':
-                    activeFilters.day = 'weekday';
-                    activeFilters.time = 'morning';
-                    document.getElementById('dayFilter').value = 'weekday';
-                    document.getElementById('timeFilter').value = 'morning';
-                    break;
-                case 'rushHour':
-                    activeFilters.day = 'weekday';
-                    activeFilters.time = 'morning';
-                    document.getElementById('dayFilter').value = 'weekday';
-                    document.getElementById('timeFilter').value = 'morning';
-                    break;
-                case 'weekend':
-                    activeFilters.day = 'weekend';
-                    document.getElementById('dayFilter').value = 'weekend';
-                    break;
-            }
-
-            // Update form controls to match
-            document.getElementById('yearFilter').value = activeFilters.year;
-            document.getElementById('lightingFilter').value = activeFilters.lighting;
-            document.getElementById('weatherFilter').value = activeFilters.weather;
-
-            // Highlight active preset
-            if (presetName !== 'all' && buttonElement) {
-                buttonElement.classList.add('active');
-            }
-
-            // Apply the filters
-            filterCrashes(activeFilters.crashType);
-
-            // Update heatmap if active
-            if (document.getElementById('showHeatmap').checked) {
-                hideHeatmap();
-                showHeatmap();
-            }
-
-            // Update filter count
             updateFilterCount();
         }
 
@@ -1819,7 +1698,6 @@
             if (!activeFiltersChips || !resetBtn) return;
 
             if (activeCount > 0) {
-                // Build filter chips HTML
                 let chipsHtml = '';
                 const filterLabels = {
                     crashType: { 'fatal': 'Fatal only', 'pedestrian': 'Ped/Cyclist' },
@@ -1847,35 +1725,61 @@
             }
         }
 
-        function toggleAdvancedFilters() {
-            const content = document.getElementById('advancedFiltersContent');
-            const icon = document.getElementById('advancedToggleIcon');
+        // Hotspots sidebar toggle
+        function toggleHotspotsList() {
+            const hotspotsList = document.getElementById('hotspotsList');
+            const sidebarSort = document.getElementById('sidebarSort');
+            const sidebarHeader = document.getElementById('sidebarHeader');
+            const toggleIcon = document.getElementById('sidebarToggleIcon');
 
-            if (content.classList.contains('show')) {
-                content.classList.remove('show');
-                icon.innerHTML = '&#9660;';
+            hotspotsExpanded = !hotspotsExpanded;
+
+            if (hotspotsExpanded) {
+                hotspotsList.classList.remove('collapsed');
+                sidebarSort.classList.remove('collapsed');
+                sidebarHeader.classList.remove('collapsed');
+                toggleIcon.innerHTML = '&#9650;';
             } else {
-                content.classList.add('show');
-                icon.innerHTML = '&#9650;';
+                hotspotsList.classList.add('collapsed');
+                sidebarSort.classList.add('collapsed');
+                sidebarHeader.classList.add('collapsed');
+                toggleIcon.innerHTML = '&#9660;';
             }
+        }
+
+        // Hotspots sorting
+        function sortHotspots() {
+            const sortBy = document.getElementById('hotspotSortSelect').value;
+
+            sortedHotspotData = [...hotspotData];
+
+            switch(sortBy) {
+                case 'crashes':
+                    sortedHotspotData.sort((a, b) => b.injury_count - a.injury_count);
+                    break;
+                case 'fatal':
+                    sortedHotspotData.sort((a, b) => b.fatal_count - a.fatal_count);
+                    break;
+                case 'ped':
+                    sortedHotspotData.sort((a, b) => b.nonmotorist_count - a.nonmotorist_count);
+                    break;
+                case 'score':
+                default:
+                    // Already sorted by score from data
+                    break;
+            }
+
+            populateHotspots();
         }
 
         function normalizeRoadName(name) {
             if (!name) return '';
-            return name
-                .toUpperCase()
-                .replace(/\s+NO\s+\d+/g, '')
-                .replace(/\s+[NSEW]$/g, '')
-                .replace(/-[NSEW]$/g, '')
-                .replace(/\s+/g, ' ')
-                .trim();
+            return name.toUpperCase().replace(/\s+NO\s+\d+/g, '').replace(/\s+[NSEW]$/g, '').replace(/-[NSEW]$/g, '').replace(/\s+/g, ' ').trim();
         }
 
         function findCrashesForHotspot(hotspot, radiusMeters = 150) {
             const matchedCrashes = new Set();
             const hotspotNormalized = normalizeRoadName(hotspot.road_name);
-
-            // Get filtered crashes to respect active filters
             const filteredCrashes = getFilteredCrashes();
 
             filteredCrashes.forEach(crash => {
@@ -1910,24 +1814,16 @@
         function flyToCrash(crashId) {
             crashId = String(crashId);
             const crash = crashMarkersIndex[crashId];
-            if (!crash) {
-                console.warn('Crash not found:', crashId);
-                return;
-            }
+            if (!crash) return;
 
             const marker = crashMarkers.find(m => String(m.crashId) === crashId);
-            if (!marker) {
-                console.warn('Marker not found for crash:', crashId);
-                return;
-            }
+            if (!marker) return;
 
             if (highlightCircle) {
                 highlightCircle.setStyle({ fillOpacity: 0.1, opacity: 0.3 });
             }
 
-            map.flyTo([crash.lat, crash.lng], 18, {
-                duration: 0.9
-            });
+            map.flyTo([crash.lat, crash.lng], 18, { duration: 0.9 });
 
             setTimeout(() => {
                 marker.openPopup();
@@ -1948,19 +1844,19 @@
             if (!currentCrashLists[containerId]) {
                 currentCrashLists[containerId] = {
                     allCrashes: crashes,
-                    displayCount: 12,
+                    displayCount: 10,
                     sortBy: 'recent'
                 };
             }
 
             const state = currentCrashLists[containerId];
-            state.allCrashes = crashes; // Update with current filtered crashes
+            state.allCrashes = crashes;
 
             function render() {
                 if (crashes.length === 0) {
                     container.innerHTML = `
-                        <div style="padding: 12px; color: #666; font-size: 13px; font-style: italic;">
-                            No crashes found matching current filters. Try adjusting filters or check nearby hotspots.
+                        <div style="padding: 12px; color: #666; font-size: 12px; font-style: italic;">
+                            No crashes found matching current filters.
                         </div>
                     `;
                     return;
@@ -1987,13 +1883,13 @@
 
                 let html = `
                     <div class="crash-list-header">
-                        <div style="font-size: 12px; color: #666; font-weight: 500;">
-                            ${crashes.length} crash${crashes.length !== 1 ? 'es' : ''} found
+                        <div style="font-size: 11px; color: #666; font-weight: 500;">
+                            ${crashes.length} crash${crashes.length !== 1 ? 'es' : ''}
                         </div>
                         <select class="sort-select" id="sort-${containerId}">
-                            <option value="recent" ${state.sortBy === 'recent' ? 'selected' : ''}>Most recent</option>
-                            <option value="severity" ${state.sortBy === 'severity' ? 'selected' : ''}>By severity</option>
-                            <option value="pedcyclist" ${state.sortBy === 'pedcyclist' ? 'selected' : ''}>Ped/cyclist first</option>
+                            <option value="recent" ${state.sortBy === 'recent' ? 'selected' : ''}>Recent</option>
+                            <option value="severity" ${state.sortBy === 'severity' ? 'selected' : ''}>Severity</option>
+                            <option value="pedcyclist" ${state.sortBy === 'pedcyclist' ? 'selected' : ''}>Ped/cyclist</option>
                         </select>
                     </div>
                 `;
@@ -2010,15 +1906,8 @@
                             <div class="crash-severity ${crash.severity} ${crash.type}">
                                 ${crash.severity.toUpperCase()}${crash.type !== 'vehicle' ? ' - ' + crash.type.toUpperCase() : ''}
                             </div>
-                            <div class="crash-date">
-                                ${crash.date} at ${crash.time}
-                            </div>
-                            <div class="crash-details">
-                                ${crash.location}
-                            </div>
-                            <div class="crash-details">
-                                ${crash.weather} &bull; ${crash.light}
-                            </div>
+                            <div class="crash-date">${crash.date} at ${crash.time}</div>
+                            <div class="crash-details">${crash.weather} &bull; ${crash.light}</div>
                         </div>
                     `;
                 });
@@ -2026,7 +1915,7 @@
                 if (remaining > 0) {
                     html += `
                         <button class="show-more-btn" id="show-more-${containerId}">
-                            Show ${Math.min(12, remaining)} more (${remaining} remaining)
+                            Show ${Math.min(10, remaining)} more (${remaining} left)
                         </button>
                     `;
                 }
@@ -2055,7 +1944,7 @@
                 if (showMoreBtn) {
                     showMoreBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        state.displayCount += 12;
+                        state.displayCount += 10;
                         render();
                     });
                 }
@@ -2068,7 +1957,9 @@
             const container = document.getElementById('hotspotsList');
             if (!container) return;
 
-            hotspotData.forEach((hotspot, index) => {
+            container.innerHTML = '';
+
+            sortedHotspotData.forEach((hotspot, index) => {
                 const div = document.createElement('div');
                 div.className = 'hotspot-item';
                 div.setAttribute('data-hotspot-index', index);
@@ -2076,29 +1967,32 @@
                 const hasFatal = hotspot.fatal_count > 0;
                 const hasPedCyclist = hotspot.nonmotorist_count > 0;
 
-                let badges = '';
-                if (hasFatal) badges += '<span class="fatal-indicator">FATAL</span>';
-                if (hasPedCyclist) badges += '<span class="ped-cyclist-indicator">PED/CYCLIST</span>';
+                let badgesHtml = '';
+                if (hasFatal) badgesHtml += '<span class="fatal-indicator">FATAL</span>';
+                if (hasPedCyclist) badgesHtml += '<span class="ped-cyclist-indicator">PED/CYCLIST</span>';
 
                 div.innerHTML = `
-                    <div class="hotspot-name">
-                        ${index + 1}. ${hotspot.road_name} ${badges}
+                    <div class="hotspot-header">
+                        <div class="hotspot-name">${index + 1}. ${hotspot.road_name}</div>
+                        <div class="hotspot-badges">${badgesHtml}</div>
                     </div>
                     <div class="hotspot-stats">
-                        ${hotspot.injury_count} injuries${hotspot.nonmotorist_count > 0 ? ', ' + hotspot.nonmotorist_count + ' ped/cyclist' : ''}
+                        ${hotspot.injury_count} injuries${hotspot.fatal_count > 0 ? ', ' + hotspot.fatal_count + ' fatal' : ''}${hotspot.nonmotorist_count > 0 ? ', ' + hotspot.nonmotorist_count + ' ped/cyclist' : ''}
                     </div>
                     <div class="crash-detail-panel" id="crash-detail-${index}" style="display: none;">
                         <button class="toggle-crashes-btn" data-hotspot-index="${index}">
-                            <span>View crashes at this location</span>
+                            <span>View crashes</span>
                             <span class="toggle-icon">&#9660;</span>
                         </button>
-                        <div id="crash-list-${index}" style="display: none; margin-top: 12px;"></div>
+                        <div id="crash-list-${index}" style="display: none; margin-top: 10px;"></div>
                     </div>
                 `;
 
                 div.addEventListener('click', (e) => {
                     if (e.target.closest('.toggle-crashes-btn')) return;
                     if (e.target.closest('.crash-row')) return;
+                    if (e.target.closest('.sort-select')) return;
+                    if (e.target.closest('.show-more-btn')) return;
                     selectHotspot(hotspot, index);
                 });
 
@@ -2113,10 +2007,9 @@
                     const icon = btn.querySelector('.toggle-icon');
 
                     if (crashList.style.display === 'none') {
-                        // Always refresh the crash list with current filters
-                        const hotspot = hotspotData[index];
+                        const hotspot = sortedHotspotData[index];
                         const crashes = findCrashesForHotspot(hotspot);
-                        currentCrashLists[`crash-list-${index}`] = null; // Reset state
+                        currentCrashLists[`crash-list-${index}`] = null;
                         renderCrashList(hotspot, crashes, `crash-list-${index}`);
                         crashList.style.display = 'block';
                         icon.innerHTML = '&#9650;';
@@ -2150,9 +2043,7 @@
 
                 const hasFatal = hotspot.fatal_count > 0;
 
-                map.flyTo([hotspot.lat, hotspot.lng], 16, {
-                    duration: 1.0
-                });
+                map.flyTo([hotspot.lat, hotspot.lng], 16, { duration: 1.0 });
 
                 setTimeout(() => {
                     highlightCircle = L.circle([hotspot.lat, hotspot.lng], {
@@ -2186,29 +2077,18 @@
             }, 100);
         }
 
+        // QA functions
         function runSmokeTests() {
             testResults = {};
             const timestamp = new Date().toLocaleString();
             document.getElementById('qaTimestamp').textContent = timestamp;
 
-            testResults.tabNavigation = (() => {
-                const navItems = document.querySelectorAll('.nav-item');
-                return navItems.length >= 4;
-            })();
-
+            testResults.tabNavigation = document.querySelectorAll('.nav-item').length >= 4;
             testResults.mapInitialized = map !== null && map !== undefined;
-
             testResults.tilesAttempted = true;
-
             testResults.crashDataParsed = Array.isArray(crashData) && crashData.length > 0;
-
             testResults.markersCreated = crashMarkers.length > 0;
-
-            testResults.hotspotsRendered = (() => {
-                const hotspotItems = document.querySelectorAll('.hotspot-item');
-                return hotspotItems.length > 0;
-            })();
-
+            testResults.hotspotsRendered = document.querySelectorAll('.hotspot-item').length > 0;
             testResults.filterLogic = (() => {
                 const allCrashes = crashData.length;
                 const fatalCrashes = crashData.filter(c => c.severity === 'fatal').length;
@@ -2216,7 +2096,6 @@
                 return allCrashes > 0 && (fatalCrashes > 0 || pedCrashes > 0);
             })();
 
-            // Test year filter
             testResults.yearFilterWorks = (() => {
                 const oldYear = activeFilters.year;
                 activeFilters.year = '2022';
@@ -2227,7 +2106,6 @@
                 return filtered2022.length !== filtered2023.length && filtered2022.length > 0 && filtered2023.length > 0;
             })();
 
-            // Test day filter
             testResults.dayFilterWorks = (() => {
                 const oldDay = activeFilters.day;
                 activeFilters.day = 'weekday';
@@ -2239,11 +2117,8 @@
             })();
 
             testResults.heatmapBuilds = true;
-
             testResults.hotspotClickTriggersFlyTo = typeof selectHotspot === 'function';
-
             testResults.crashRowClickTriggersFlyTo = typeof flyToCrash === 'function';
-
             testResults.paginationWorks = typeof renderCrashList === 'function';
 
             displayTestResults();
@@ -2299,7 +2174,6 @@
         // Main initialization
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                // Load external data
                 await loadData();
 
                 const validationErrors = validateData();
@@ -2327,4 +2201,3 @@
     </script>
 </body>
 </html>
-
