@@ -1479,6 +1479,12 @@
                         Show density overlay
                     </label>
                 </div>
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="excludeHighways">
+                        Exclude I-95 / Merritt Pkwy
+                    </label>
+                </div>
 
                 <!-- Reset Button -->
                 <button class="reset-filters-btn" id="resetFiltersBtn" onclick="resetFilters()" disabled>
@@ -1766,7 +1772,8 @@
             time: 'all',
             day: 'all',
             lighting: 'all',
-            weather: 'all'
+            weather: 'all',
+            highway: false
         };
         let highlightCircle = null;
         let currentSelectedHotspot = null;
@@ -2090,6 +2097,15 @@
                 });
             }
 
+            // Highway filter checkbox
+            const highwayCheckbox = document.getElementById('excludeHighways');
+            if (highwayCheckbox) {
+                highwayCheckbox.addEventListener('change', (e) => {
+                    activeFilters.highway = e.target.checked;
+                    applyFilters();
+                });
+            }
+
             document.querySelectorAll('input[name="crashFilter"]').forEach(radio => {
                 radio.addEventListener('change', (e) => {
                     currentFilter = e.target.value;
@@ -2190,6 +2206,12 @@
             }
         }
 
+        function matchesHighwayFilter(crash) {
+            if (!activeFilters.highway) return true;
+            const loc = crash.location || '';
+            return !loc.startsWith('95-') && !loc.startsWith('15-');
+        }
+
         function getFilteredCrashes() {
             let filtered = crashData;
 
@@ -2206,7 +2228,8 @@
                 matchesTimeFilter(crash) &&
                 matchesDayFilter(crash) &&
                 matchesLightingFilter(crash) &&
-                matchesWeatherFilter(crash)
+                matchesWeatherFilter(crash) &&
+                matchesHighwayFilter(crash)
             );
 
             return filtered;
@@ -2407,7 +2430,8 @@
                 time: 'all',
                 day: 'all',
                 lighting: 'all',
-                weather: 'all'
+                weather: 'all',
+                highway: false
             };
 
             document.querySelector('input[name="crashFilter"][value="all"]').checked = true;
@@ -2418,6 +2442,7 @@
             document.querySelector('.day-pill[data-day="all"]').classList.add('active');
             document.getElementById('lightingFilter').value = 'all';
             document.getElementById('weatherFilter').value = 'all';
+            document.getElementById('excludeHighways').checked = false;
 
             filterCrashes('all');
 
@@ -2430,7 +2455,10 @@
         }
 
         function updateFilterCount() {
-            const activeCount = Object.values(activeFilters).filter(val => val !== 'all').length;
+            const activeCount = Object.entries(activeFilters).filter(([key, val]) => {
+                if (key === 'highway') return val === true;
+                return val !== 'all';
+            }).length;
             const activeFiltersChips = document.getElementById('activeFiltersChips');
             const resetBtn = document.getElementById('resetFiltersBtn');
 
@@ -2448,8 +2476,10 @@
                 };
 
                 Object.entries(activeFilters).forEach(([key, value]) => {
-                    if (value !== 'all') {
-                        const label = filterLabels[key][value] || value;
+                    if (key === 'highway' && value === true) {
+                        chipsHtml += `<span class="filter-chip">No Highways</span>`;
+                    } else if (value !== 'all' && key !== 'highway') {
+                        const label = filterLabels[key]?.[value] || value;
                         chipsHtml += `<span class="filter-chip">${label}</span>`;
                     }
                 });
